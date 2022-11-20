@@ -1,7 +1,11 @@
 package src.code;
 
-public class SearchProblem {
-    public static void main(String[] args) {
-        
-    }
+public abstract class SearchProblem {
+    Object[] operators;
+    Object[] initialState;
+    Object[] stateSpace;
+
+
+   abstract public boolean goalTest();
+   abstract public int pathCost();
 }
