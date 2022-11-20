@@ -1,4 +1,4 @@
-package src.code;
+package code;
 
 public abstract class SearchProblem {
     Object[] operators;

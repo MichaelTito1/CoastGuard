@@ -1,4 +1,4 @@
-package src.code;
+package code;
 
 public class CoastGuard extends SearchProblem{
 
