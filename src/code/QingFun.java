@@ -1,7 +1,5 @@
 package code;
 
-import java.util.PriorityQueue;
-
 public abstract class QingFun {
     Object queue;
 
