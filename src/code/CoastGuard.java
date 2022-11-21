@@ -32,7 +32,7 @@ public class CoastGuard extends SearchProblem{
 
         //generating stations randomly
         // NOTE: there is no upper limit for the number of ships or stations generated as long as no 2 objects occupy the same cell
-        int numStations = rand.nextInt(n*m-numShips); 
+        int numStations = rand.nextInt(n*m-numShips)+1;
         for (int i = 0; i < numStations; i++) {
             do{
                 int x = rand.nextInt(n), y = rand.nextInt(m);
@@ -92,7 +92,7 @@ public class CoastGuard extends SearchProblem{
     public static void main(String[] args) {
         System.out.println(genGrid());
         String s = "5,7;200;3,4;1,2,4,5;4,6,100,2,2,50,1,6,30";
-        gridParse(s);
+        gridParse(genGrid());
     }
 
     @Override
