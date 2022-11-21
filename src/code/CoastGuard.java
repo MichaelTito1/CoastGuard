@@ -15,7 +15,7 @@ public class CoastGuard extends SearchProblem{
 
         // generating coast guard's data
         int maxCapacity = rand.nextInt(71)+30;
-        int cgX = rand.nextInt(n), cgY = rand.nextInt(m);
+        int cgX = rand.nextInt(m), cgY = rand.nextInt(n);
 
         // generating ships randomly
         int numShips = rand.nextInt(n*m-1) + 1;
@@ -71,9 +71,9 @@ public class CoastGuard extends SearchProblem{
                     String[] cell = grid[i][j].split(";");
                     
                     if(cell[0].equals("station"))
-                        stationString += i + "," + j + ",";
+                        stationString += j + "," + i + ",";
                     else if(cell[0].equals("ship")){
-                        shipString += i + "," + j + "," + cell[1]+",";
+                        shipString += j + "," + i + "," + cell[1]+",";
                     }
                 }
             }
