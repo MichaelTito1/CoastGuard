@@ -44,6 +44,21 @@ public class CoastGuard extends SearchProblem{
         }
 
         // converting generated grid to string
+        return convertGridToString(grid, n, m, maxCapacity, cgX, cgY);
+    }
+
+    /**
+     * Converts the given grid to a specific string format specified in the project description.
+     * 
+     * @param grid a 2D string array representing the grid itself
+     * @param n number of rows in the grid
+     * @param m number of columns
+     * @param maxCapacity maximum capacity of the coast guard 
+     * @param cgX initial x coordinate of the coast guard on the grid
+     * @param cgY initial y coordinate of the coast guard on the grid
+     * @return the grid in its string format
+     */
+    private static String convertGridToString(String[][] grid, int n, int m, int maxCapacity, int cgX, int cgY){
         // 1. general info
         String gridString = m+","+n+";"+maxCapacity+";"+cgX+","+cgY+";";
         
@@ -72,9 +87,11 @@ public class CoastGuard extends SearchProblem{
         return gridString;
     }
 
+    // Driver code
     public static void main(String[] args) {
         System.out.println(genGrid());
     }
+
     @Override
     public boolean goalTest() {
         // TODO Auto-generated method stub
