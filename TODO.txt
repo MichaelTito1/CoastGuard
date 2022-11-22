@@ -1,3 +1,11 @@
 1- String GenGrid()
 2- 2d Array GenGrid()
 3- abstract class search-tree-Node
+
+
+---------------------------
+
+1-Goal Test + State formulation
+2-Path Cost
+3- Deserialize Grid
+4- Serialize Grid
