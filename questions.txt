@@ -1,5 +1,0 @@
-1- pathcost return type int or int[]
-2- cell type main and subclasses ??
-3- put black boxes in the stations ?
-4- what to do with state space ?
-5- Can we put the grid in the state ?
