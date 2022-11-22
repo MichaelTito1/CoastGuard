@@ -53,14 +53,17 @@ public class CoastGuard extends SearchProblem{
     }
 
 
-
+    private static int[] getGridDimensions(String firstPortion){
+        String[] firstSplitted = firstPortion.split(",");
+        int m = Integer.parseInt(firstSplitted[0]);
+        int n = Integer.parseInt(firstSplitted[1]);
+        return(new int[]{m,n});
+    }
 
     public void getInitialState(String grid){
       String[] splitted = grid.split(";");
-      String[] firstSplitted = splitted[0].split(",");
-      int m = Integer.parseInt(firstSplitted[0]);
-      int n = Integer.parseInt(firstSplitted[1]);
-      String[][] parsedGrid = new String[n][m];
+      int[] dimensions = getGridDimensions(splitted[0]);
+      String[][] parsedGrid = new String[dimensions[1]][dimensions[0]];
       int maxCapacity = Integer.parseInt(splitted[1]);
       initialState[2] = splitted[2];
       initialState[1] = maxCapacity;
@@ -210,9 +213,13 @@ public class CoastGuard extends SearchProblem{
         return gridString;
     }
 
-    private static String[][] deserializeGrid(){
-        //TODO to be implemented
-        return null;
+    private static String[][] deserializeGrid(String serializedString){
+        String[] splitted = serializedString.split(";");
+        int[] dimensions = getGridDimensions(splitted[0]);
+        String[][] stateParsedGrid = new String[dimensions[1]][dimensions[0]];
+        putStationsInGrid(splitted[1],stateParsedGrid);
+        putShipsInGrid(splitted[2],stateParsedGrid);
+        return stateParsedGrid;
     }
 
     private static String serializeGrid(String[][] grid){
