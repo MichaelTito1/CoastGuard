@@ -161,7 +161,7 @@ public class CoastGuard extends SearchProblem{
         Object[] cell=deserializeCell(grid[cgLocation[0]][cgLocation[1]]);
         cell[2]=-1;
         newStateGrid[cgLocation[0]][cgLocation[1]]=serializeCell(cell);
-        return new TreeNode(new Object[]{newStateGrid,capacity,cgLocation},node,Operators.RETRIEVE, node.depth+1);
+        return new TreeNode(new Object[]{serializeGrid(newStateGrid),capacity,cgLocation},node,Operators.RETRIEVE, node.depth+1);
     }
 
     private boolean canRetrieve(String[][] grid, int[] cgLocation) {
@@ -174,7 +174,7 @@ public class CoastGuard extends SearchProblem{
     private TreeNode expandDrop(String[][] grid, int capacity, int[] cgLocation, TreeNode node) {
         String[][] newStateGrid=getNextMovementGridState(grid);
         capacity=maxCapacity;
-        return new TreeNode(new Object[]{newStateGrid,capacity,cgLocation},node,Operators.DROP, node.depth+1);
+        return new TreeNode(new Object[]{serializeGrid(newStateGrid),capacity,cgLocation},node,Operators.DROP, node.depth+1);
     }
 
     private boolean canDrop(String[][] grid, int[] cgLocation) {
@@ -188,7 +188,7 @@ public class CoastGuard extends SearchProblem{
         cell[1]=Math.max(0,(int)cell[1]-capacity);
         capacity=Math.max(0,capacity-(int)cell[1]);
         newStateGrid[cgLocation[0]][cgLocation[1]]=serializeCell(cell);
-        return new TreeNode(new Object[]{newStateGrid,capacity,cgLocation},node,Operators.PICKUP, node.depth+1);
+        return new TreeNode(new Object[]{serializeGrid(newStateGrid),capacity,cgLocation},node,Operators.PICKUP, node.depth+1);
     }
 
     private boolean canPickUp(String[][] grid, int capacity, int[] cgLocation) {
@@ -237,7 +237,7 @@ public class CoastGuard extends SearchProblem{
             upLocation = new int[]{cgLocation[0],cgLocation[1]};
         else
             upLocation= new int[]{cgLocation[0],cgLocation[1]-1};
-        return new TreeNode(new Object[]{newStateGrid,capacity,upLocation},parent,Operators.UP,parent.depth+1);
+        return new TreeNode(new Object[]{serializeGrid(newStateGrid),capacity,upLocation},parent,Operators.UP,parent.depth+1);
     }
 
     private TreeNode expandMovementDown(String[][] newStateGrid,int capacity, int[] cgLocation,TreeNode parent) {
@@ -246,7 +246,7 @@ public class CoastGuard extends SearchProblem{
             downLocation = new int[]{cgLocation[0],cgLocation[1]};
         else
             downLocation= new int[]{cgLocation[0],cgLocation[1]+1};
-        return new TreeNode(new Object[]{newStateGrid,capacity,downLocation},parent,Operators.DOWN,parent.depth+1);
+        return new TreeNode(new Object[]{serializeGrid(newStateGrid),capacity,downLocation},parent,Operators.DOWN,parent.depth+1);
     }
 
     private TreeNode expandMovementLeft(String[][] newStateGrid,int capacity, int[] cgLocation,TreeNode parent) {
@@ -255,7 +255,7 @@ public class CoastGuard extends SearchProblem{
             leftLocation = new int[]{cgLocation[0],cgLocation[1]};
         else
             leftLocation= new int[]{cgLocation[0]-1,cgLocation[1]};
-        return new TreeNode(new Object[]{newStateGrid,capacity,leftLocation},parent,Operators.LEFT,parent.depth+1);
+        return new TreeNode(new Object[]{serializeGrid(newStateGrid),capacity,leftLocation},parent,Operators.LEFT,parent.depth+1);
     }
 
     private TreeNode expandMovementRight(String[][] newStateGrid,int capacity, int[] cgLocation,TreeNode parent) {
@@ -264,7 +264,7 @@ public class CoastGuard extends SearchProblem{
             rightLocation = new int[]{cgLocation[0],cgLocation[1]};
         else
             rightLocation= new int[]{cgLocation[0]+1,cgLocation[1]};
-        return new TreeNode(new Object[]{newStateGrid,capacity,rightLocation},parent,Operators.RIGHT,parent.depth+1);
+        return new TreeNode(new Object[]{serializeGrid(newStateGrid),capacity,rightLocation},parent,Operators.RIGHT,parent.depth+1);
 
     }
     
