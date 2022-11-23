@@ -23,10 +23,51 @@ public class CoastGuard extends SearchProblem{
         getInitialState(generatedGrid);
     }
 
+    /**
+     * This method checks if the given node's state is a goal state
+     * @param node the current node
+     * @return true if it passes the goal test, false otherwise
+     */
     @Override
     public boolean goalTest(TreeNode node) {
-        // TODO Auto-generated method stub
-        return false;
+        // state = {grid, capacity, location}
+        // if coast guard still has passengers on board, return false
+        if(Integer.parseInt((String) node.state[1]) > 0)
+            return false;
+        
+        int passengers = 0;
+        int boxes = 0;
+        String[][] curGrid = (String[][]) node.state[0];
+        for (int i = 0; i < curGrid.length; i++) {
+            for (int j = 0; j < curGrid[0].length; j++) {
+                Object[] cell = deserializeCell(curGrid[i][j]);
+                if(cell[0].equals("S")){ // check for passengers and box on ship
+                    passengers = Integer.parseInt((String) cell[1]);
+                    boxes = Integer.parseInt((String) cell[1]) > 0 ? 1 : 0;
+                }
+                if(passengers > 0 || boxes > 0) // if there are alive passengers or unretrieved boxes, return false
+                    return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * This method converts the string representation of a grid cell 
+     * 
+     * @param cell
+     * @return
+     */
+    private Object[] deserializeCell(String cell){
+        String[] cellInfo = cell.split(";");
+        Object[] cellArr = new Object[cellInfo.length];
+        String cellType = cellInfo[0];
+        cellArr[0] = cellType;
+        if(cellType.equals("S")){
+            cellArr[1] = Integer.parseInt(cellInfo[1]); // num of passengers on board
+            cellArr[2] = Integer.parseInt(cellInfo[2]); // box health on board
+        }
+        return cellArr;
     }
 
     @Override
@@ -44,16 +85,12 @@ public class CoastGuard extends SearchProblem{
 
 
     // Driver code
-
     public static void main(String[] args) {
         System.out.println(genGrid());
         String s = "5,7;200;3,4;1,2,4,5;4,6,100,2,2,50,1,6,30";
         CoastGuard cg=new CoastGuard(genGrid());
         cg.printState(cg.initialState);
     }
-
-
-
 
     public void getInitialState(String grid){
       String[] splitted = grid.split(";");
@@ -147,7 +184,7 @@ public class CoastGuard extends SearchProblem{
                 int x = rand.nextInt(n), y = rand.nextInt(m);
                 if(grid[x][y] == null){
                     int numPassengers = rand.nextInt(100)+1;
-                    grid[x][y] = "ship;"+numPassengers+";20";
+                    grid[x][y] = "S;"+numPassengers+";20";
                     break;
                 }
             }while(true);
@@ -160,7 +197,7 @@ public class CoastGuard extends SearchProblem{
             do{
                 int x = rand.nextInt(n), y = rand.nextInt(m);
                 if(grid[x][y] == null){
-                    grid[x][y] = "station";
+                    grid[x][y] = "I";
                     break;
                 }
             }while(true);
@@ -193,9 +230,9 @@ public class CoastGuard extends SearchProblem{
                 if (grid[i][j] != null) {
                     String[] cell = grid[i][j].split(";");
 
-                    if (cell[0].equals("station"))
+                    if (cell[0].equals("I"))
                         stationString += j + "," + i + ",";
-                    else if (cell[0].equals("ship")) {
+                    else if (cell[0].equals("S")) {
                         shipString += j + "," + i + "," + cell[1] + ",";
                     }
                 }
@@ -233,9 +270,9 @@ public class CoastGuard extends SearchProblem{
                 if (grid[i][j] != null) {
                     String[] cell = grid[i][j].split(";");
 
-                    if (cell[0].equals("station"))
+                    if (cell[0].equals("I"))
                         stationString += j + "," + i + ",";
-                    else if (cell[0].equals("ship")) {
+                    else if (cell[0].equals("S")) {
                         shipString += j + "," + i + "," + cell[1] + ","+cell[2];
                     }
                 }
