@@ -7,7 +7,7 @@ public abstract class SearchProblem {
 
 
    abstract public boolean goalTest(TreeNode node);
-   abstract public int pathCost(TreeNode node);
+   abstract public int[] pathCost(TreeNode node);
    abstract public TreeNode[] expand(TreeNode node);
 
    public static TreeNode genericSearchProblem(SearchProblem problem,QingFun qf){
@@ -22,6 +22,6 @@ public abstract class SearchProblem {
         return null;
    }
    public static TreeNode makeNode(SearchProblem problem){
-        return new TreeNode(problem.initialState, null,null,0,0);
+        return new TreeNode(problem.initialState, null,null,0,new int[2]);
    }
 }
