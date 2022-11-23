@@ -5,9 +5,9 @@ public class TreeNode {
     TreeNode parent;
     Object operator;
     int depth;
-    int pathCost;
+    int[] pathCost;
 
-    public TreeNode(Object[] state, TreeNode parent, Object operator, int depth, int pathCost) {
+    public TreeNode(Object[] state, TreeNode parent, Object operator, int depth, int[] pathCost) {
         this.state = state;
         this.parent = parent;
         this.operator = operator;
