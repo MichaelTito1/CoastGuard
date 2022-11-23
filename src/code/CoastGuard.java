@@ -1,8 +1,11 @@
 package code;
 
+import java.util.ArrayList;
 import java.util.Random;
 
 public class CoastGuard extends SearchProblem{
+
+    int maxCapacity;
 
     enum Operators {
         LEFT,RIGHT,UP,DOWN,PICKUP,DROP,RETRIEVE
@@ -21,6 +24,7 @@ public class CoastGuard extends SearchProblem{
         //state: SerializedGrid,capacity,location
         initialState=new Object[3];
         getInitialState(generatedGrid);
+        maxCapacity=(int)initialState[1];
     }
 
     /**
@@ -59,7 +63,7 @@ public class CoastGuard extends SearchProblem{
      * @return
      */
     private Object[] deserializeCell(String cell){
-        String[] cellInfo = cell.split(";");
+        String[] cellInfo = cell.split(",");
         Object[] cellArr = new Object[cellInfo.length];
         String cellType = cellInfo[0];
         cellArr[0] = cellType;
@@ -68,6 +72,14 @@ public class CoastGuard extends SearchProblem{
             cellArr[2] = Integer.parseInt(cellInfo[2]); // box health on board
         }
         return cellArr;
+    }
+
+    private String serializeCell(Object[] cell){
+        String[] strCell=new String[cell.length];
+        for (int i = 0; i < cell.length; i++) {
+            strCell[i]=cell[i].toString();
+        }
+        return String.join(",",strCell);
     }
 
     @Override
@@ -118,30 +130,146 @@ public class CoastGuard extends SearchProblem{
 
     @Override
     public TreeNode[] expand(TreeNode node) {
-        // TODO Auto-generated method stub
-        return new TreeNode[0];
+        //get current state values
+        String[][] grid = deserializeGrid((String) node.state[0]);
+        int capacity=(int)node.state[1];
+        int[] cgLocation=getIntTuplesFromString((String) node.state[2]);
+
+        ArrayList<TreeNode> expandedNodes=new ArrayList<>();
+
+        //get nodes resulted from movement expansion
+        expandedNodes.addAll(expandMovement(node,grid,capacity,cgLocation));
+
+        if(canPickUp(grid,capacity,cgLocation))
+            expandedNodes.add(expandPickup(grid,capacity,cgLocation,node));
+
+        if(canDrop(grid,cgLocation))
+            expandedNodes.add(expandDrop(grid,capacity,cgLocation,node));
+
+        if(canRetrieve(grid,cgLocation))
+            expandedNodes.add(expandRetrieve(grid,capacity,cgLocation,node));
+
+        for (TreeNode cur:
+             expandedNodes) {
+            cur.pathCost=pathCost(cur);
+        }
+        return expandedNodes.toArray(new TreeNode[0]);
+    }
+
+    private TreeNode expandRetrieve(String[][] grid, int capacity, int[] cgLocation, TreeNode node) {
+        String[][] newStateGrid=getNextMovementGridState(grid);
+        Object[] cell=deserializeCell(grid[cgLocation[0]][cgLocation[1]]);
+        cell[2]=-1;
+        newStateGrid[cgLocation[0]][cgLocation[1]]=serializeCell(cell);
+        return new TreeNode(new Object[]{newStateGrid,capacity,cgLocation},node,Operators.RETRIEVE, node.depth+1);
+    }
+
+    private boolean canRetrieve(String[][] grid, int[] cgLocation) {
+        Object[] cell=deserializeCell(grid[cgLocation[0]][cgLocation[1]]);
+        if(!cell[0].equals("S")||(int)cell[2]<=0)
+            return false;
+        return true;
     }
 
 
+    private TreeNode expandDrop(String[][] grid, int capacity, int[] cgLocation, TreeNode node) {
+        String[][] newStateGrid=getNextMovementGridState(grid);
+        capacity=maxCapacity;
+        return new TreeNode(new Object[]{newStateGrid,capacity,cgLocation},node,Operators.DROP, node.depth+1);
+    }
 
-    // Driver code
-    public static void main(String[] args) {
-        System.out.println(genGrid());
-        String s = "5,7;200;3,4;1,2,4,5;4,6,100,2,2,50,1,6,30";
-        CoastGuard cg=new CoastGuard(genGrid());
-        cg.printState(cg.initialState);
-        String s2 = "5,7;1,2,4,5;4,6,100,15,2,2,50,10,1,6,30,3";
-        String[][] toPrintGrid = deserializeGrid(s2);
-        for(int i=0; i<toPrintGrid.length ; i++){
-            for(int j=0 ; j<toPrintGrid[0].length ; j++){
-                System.out.print(toPrintGrid[i][j] + " ");
+    private boolean canDrop(String[][] grid, int[] cgLocation) {
+        Object[] cell=deserializeCell(grid[cgLocation[0]][cgLocation[1]]);
+        return cell[0].equals("I");
+    }
+
+    private TreeNode expandPickup(String[][] grid, int capacity, int[] cgLocation, TreeNode node) {
+        String[][] newStateGrid=getNextMovementGridState(grid);
+        Object[] cell=deserializeCell(grid[cgLocation[0]][cgLocation[1]]);
+        cell[1]=Math.max(0,(int)cell[1]-capacity);
+        capacity=Math.max(0,capacity-(int)cell[1]);
+        newStateGrid[cgLocation[0]][cgLocation[1]]=serializeCell(cell);
+        return new TreeNode(new Object[]{newStateGrid,capacity,cgLocation},node,Operators.PICKUP, node.depth+1);
+    }
+
+    private boolean canPickUp(String[][] grid, int capacity, int[] cgLocation) {
+        if(capacity==0)
+            return false;
+        Object[] cell=deserializeCell(grid[cgLocation[0]][cgLocation[1]]);
+        if(!cell[0].equals("S")||(int)cell[1]==0)
+            return false;
+        return true;
+    }
+
+    private ArrayList<TreeNode> expandMovement(TreeNode parent,String[][] grid,int capacity, int[] cgLocation) {
+        ArrayList<TreeNode> res=new ArrayList<>();
+
+        String[][] newStateGrid= getNextMovementGridState(grid);
+
+        res.add(expandMovementUp(newStateGrid,capacity,cgLocation,parent));
+        res.add(expandMovementDown(newStateGrid,capacity,cgLocation,parent));
+        res.add(expandMovementLeft(newStateGrid,capacity,cgLocation,parent));
+        res.add(expandMovementRight(newStateGrid,capacity,cgLocation,parent));
+        return res;
+    }
+
+    private String[][] getNextMovementGridState(String[][] grid) {
+        String[][] newGridState=new String[grid.length][grid[0].length];
+        for (int i = 0; i < grid.length; i++) {
+            for (int j = 0; j < grid[0].length; j++) {
+                Object[] cell=deserializeCell(grid[i][j]);
+                if(cell[0].equals("S")){
+                    if((int)cell[1]==0){
+                        if((int)cell[2]>0)
+                            cell[2]=(int)cell[2]-1;
+                    }else{
+                        cell[1]=(int)cell[1]-1;
+                    }
+                }
+                newGridState[i][j]=serializeCell(cell);
             }
-            System.out.println();
         }
-        
+        return newGridState;
+    }
+
+    private TreeNode expandMovementUp(String[][] newStateGrid,int capacity, int[] cgLocation,TreeNode parent) {
+        int[] upLocation;
+        if(cgLocation[1]==0)
+            upLocation = new int[]{cgLocation[0],cgLocation[1]};
+        else
+            upLocation= new int[]{cgLocation[0],cgLocation[1]-1};
+        return new TreeNode(new Object[]{newStateGrid,capacity,upLocation},parent,Operators.UP,parent.depth+1);
+    }
+
+    private TreeNode expandMovementDown(String[][] newStateGrid,int capacity, int[] cgLocation,TreeNode parent) {
+        int[] downLocation;
+        if(cgLocation[1]==newStateGrid[0].length-1)
+            downLocation = new int[]{cgLocation[0],cgLocation[1]};
+        else
+            downLocation= new int[]{cgLocation[0],cgLocation[1]+1};
+        return new TreeNode(new Object[]{newStateGrid,capacity,downLocation},parent,Operators.DOWN,parent.depth+1);
+    }
+
+    private TreeNode expandMovementLeft(String[][] newStateGrid,int capacity, int[] cgLocation,TreeNode parent) {
+        int[] leftLocation;
+        if(cgLocation[0]==0)
+            leftLocation = new int[]{cgLocation[0],cgLocation[1]};
+        else
+            leftLocation= new int[]{cgLocation[0]-1,cgLocation[1]};
+        return new TreeNode(new Object[]{newStateGrid,capacity,leftLocation},parent,Operators.LEFT,parent.depth+1);
+    }
+
+    private TreeNode expandMovementRight(String[][] newStateGrid,int capacity, int[] cgLocation,TreeNode parent) {
+        int[] rightLocation;
+        if(cgLocation[0]==newStateGrid.length-1)
+            rightLocation = new int[]{cgLocation[0],cgLocation[1]};
+        else
+            rightLocation= new int[]{cgLocation[0]+1,cgLocation[1]};
+        return new TreeNode(new Object[]{newStateGrid,capacity,rightLocation},parent,Operators.RIGHT,parent.depth+1);
+
     }
     
-    private static int[] getGridDimensions(String firstPortion){
+    private static int[] getIntTuplesFromString(String firstPortion){
         String[] firstSplitted = firstPortion.split(",");
         int m = Integer.parseInt(firstSplitted[0]);
         int n = Integer.parseInt(firstSplitted[1]);
@@ -150,7 +278,7 @@ public class CoastGuard extends SearchProblem{
 
     public void getInitialState(String grid){
       String[] splitted = grid.split(";");
-      int[] dimensions = getGridDimensions(splitted[0]);
+      int[] dimensions = getIntTuplesFromString(splitted[0]);
       String[][] parsedGrid = new String[dimensions[1]][dimensions[0]];
       int maxCapacity = Integer.parseInt(splitted[1]);
       initialState[2] = splitted[2];
@@ -340,7 +468,7 @@ public class CoastGuard extends SearchProblem{
 
     private static String[][] deserializeGrid(String serializedString){
         String[] splitted = serializedString.split(";");
-        int[] dimensions = getGridDimensions(splitted[0]);
+        int[] dimensions = getIntTuplesFromString(splitted[0]);
         String[][] stateParsedGrid = new String[dimensions[1]][dimensions[0]];
         putStationsInGrid(splitted[1],stateParsedGrid);
         putShipsInGrid(splitted[2],stateParsedGrid);
@@ -405,4 +533,19 @@ public class CoastGuard extends SearchProblem{
             }
         }
     }
+
+    // Driver code
+    public static void main(String[] args) {
+        System.out.println(genGrid());
+        String s = "5,7;200;3,4;1,2,4,5;4,6,100,2,2,50,1,6,30";
+        CoastGuard cg=new CoastGuard(genGrid());
+        cg.printState(cg.initialState);
+        String s2 = "5,7;1,2,4,5;4,6,100,15,2,2,50,10,1,6,30,3";
+        String[][] toPrintGrid = deserializeGrid(s2);
+        for(int i=0; i<toPrintGrid.length ; i++){
+            for(int j=0 ; j<toPrintGrid[0].length ; j++){
+                System.out.print(toPrintGrid[i][j] + " ");
+            }
+            System.out.println();
+        }
 }
