@@ -97,7 +97,7 @@ public class CoastGuard extends SearchProblem{
         String[][] nodeGrid = deserializeGrid((String)node.state[0]); //node Grid State
         for(int i=0 ; i<nodeGrid.length ; i++){
             for(int j=0 ; j<nodeGrid[0].length ; j++){
-                if(!(nodeGrid[i][j] == null || (nodeGrid[i][j]).equals("I"))){
+                if(!(nodeGrid[i][j].equals("E") || (nodeGrid[i][j]).equals("I"))){
                         String[] shipInfo = parentGrid[i][j].split(",");
                         if(Integer.parseInt(shipInfo[1])>0){
                                cost[0] += 1; //m x n x 2
@@ -108,7 +108,7 @@ public class CoastGuard extends SearchProblem{
                 }
             }
         }
-        if(!(nodeGrid[coastGuardY][coastGuardX]==null || (nodeGrid[coastGuardY][coastGuardX]).equals("I"))){
+        if(!(nodeGrid[coastGuardY][coastGuardX].equals("E") || (nodeGrid[coastGuardY][coastGuardX]).equals("I"))){
             String[] currentCoastGuardCell = nodeGrid[coastGuardY][coastGuardX].split(",");
             String[] parentCoastGuardCell = nodeGrid[coastGuardY][coastGuardX].split(","); //the previous state of the cell where the coast guard is in now
             if(node.operator == Operators.PICKUP && Integer.parseInt(currentCoastGuardCell[1])==0 && Integer.parseInt(parentCoastGuardCell[1])>0){
@@ -170,6 +170,7 @@ public class CoastGuard extends SearchProblem{
             return false;
         return true;
     }
+
 
     private TreeNode expandDrop(String[][] grid, int capacity, int[] cgLocation, TreeNode node) {
         String[][] newStateGrid=getNextMovementGridState(grid);
@@ -265,6 +266,7 @@ public class CoastGuard extends SearchProblem{
         else
             rightLocation= new int[]{cgLocation[0]+1,cgLocation[1]};
         return new TreeNode(new Object[]{newStateGrid,capacity,rightLocation},parent,Operators.RIGHT,parent.depth+1);
+
     }
     
     private static int[] getIntTuplesFromString(String firstPortion){
@@ -283,6 +285,7 @@ public class CoastGuard extends SearchProblem{
       initialState[1] = maxCapacity;
       putStationsInGrid(splitted[3],parsedGrid);
       putShipsInGridInitial(splitted[4],parsedGrid);
+      removeNullsFromGrid(parsedGrid);
       initialState[0]=serializeGrid(parsedGrid);
     }
 
@@ -469,6 +472,7 @@ public class CoastGuard extends SearchProblem{
         String[][] stateParsedGrid = new String[dimensions[1]][dimensions[0]];
         putStationsInGrid(splitted[1],stateParsedGrid);
         putShipsInGrid(splitted[2],stateParsedGrid);
+        removeNullsFromGrid(stateParsedGrid);
         return stateParsedGrid;
     }
 
@@ -487,8 +491,8 @@ public class CoastGuard extends SearchProblem{
         String gridString = m+","+n+';';
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < m; j++) {
-                if (grid[i][j] != null) {
-                    String[] cell = grid[i][j].split(";");
+                if (!(grid[i][j].equals("E"))) {
+                    String[] cell = grid[i][j].split(",");
 
                     if (cell[0].equals("I"))
                         stationString += j + "," + i + ",";
@@ -508,23 +512,40 @@ public class CoastGuard extends SearchProblem{
     }
 
     private void printState(Object[] state) {
-        String[][] parsedGrid=(String[][]) state[0];
+        String parsedGrid=(String) state[0];
         String location=(String)state[2];
         int capacity=(int)state[1];
-        for(int i = 0; i< parsedGrid.length; i++){
-            for(int j = 0; j< parsedGrid[0].length; j++){
-                System.out.print(parsedGrid[i][j] + " ");
-            }
-            System.out.println();
-        }
+       // for(int i = 0; i< parsedGrid.length; i++){
+          //  for(int j = 0; j< parsedGrid[0].length; j++){
+        //        System.out.print(parsedGrid[i] + " ");
+           // }
+        //    System.out.println();
+        //}
+        System.out.println(parsedGrid);
         System.out.println("Coast guard : " + location + " and " + capacity);
+    }
+
+    private static void removeNullsFromGrid(String[][] grid){
+        for(int i=0 ; i<grid.length ; i++){
+            for(int j=0 ; j<grid[0].length ; j++){
+                if(grid[i][j]==null)
+                   grid[i][j] = "E";
+            }
+        }
     }
 
     // Driver code
     public static void main(String[] args) {
         System.out.println(genGrid());
-        //String s = "5,7;200;3,4;1,2,4,5;4,6,100,2,2,50,1,6,30";
+        String s = "5,7;200;3,4;1,2,4,5;4,6,100,2,2,50,1,6,30";
         CoastGuard cg=new CoastGuard(genGrid());
         cg.printState(cg.initialState);
-    }
+        String s2 = "5,7;1,2,4,5;4,6,100,15,2,2,50,10,1,6,30,3";
+        String[][] toPrintGrid = deserializeGrid(s2);
+        for(int i=0; i<toPrintGrid.length ; i++){
+            for(int j=0 ; j<toPrintGrid[0].length ; j++){
+                System.out.print(toPrintGrid[i][j] + " ");
+            }
+            System.out.println();
+        }
 }
