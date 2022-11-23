@@ -286,6 +286,7 @@ public class CoastGuard extends SearchProblem{
       putShipsInGridInitial(splitted[4],parsedGrid);
       removeNullsFromGrid(parsedGrid);
       initialState[0]=serializeGrid(parsedGrid);
+      System.out.println("serializeGrid = " + initialState[0]);
     }
 
 
@@ -316,39 +317,49 @@ public class CoastGuard extends SearchProblem{
     }
 
     private static void putShipsInGrid(String ships, String[][] parsedGrid) {
-        int comma = 0;
-        String x = "";
-        String y = "";
-        String passengers = "";
-        String boxHealth = "";
-        for(int i=0 ; i<ships.length() ; i++){
-            if(ships.charAt(i)==','){
-                if(comma == 3){
-                   comma = 0;
-                   int xVal = Integer.parseInt(x);
-                   int yVal = Integer.parseInt(y);
-                   parsedGrid[xVal][yVal] = "S"+","+passengers+","+boxHealth;
-                   x = "";
-                   y = "";
-                   passengers = "";
-                   boxHealth = "";
-                }
-                else 
-                   comma++;
-            }
-            else if(comma == 0)
-                x += ships.charAt(i);
-            else if(comma == 1)
-                y += ships.charAt(i);
-            else if(comma == 2)
-                passengers += ships.charAt(i);
-            else 
-                boxHealth += ships.charAt(i);
-                
+        // string ships = {x,y,pass,boxHealth}*
+        String[] shipInfo = ships.split(",");
+        for (int i = 0; i < shipInfo.length-4; i+=4) {
+            int x = Integer.parseInt(shipInfo[i]);
+            int y = Integer.parseInt(shipInfo[i+1]);
+            int numPassengers = Integer.parseInt(shipInfo[i+2]);
+            int boxHealth = Integer.parseInt(shipInfo[i+3]);
+            parsedGrid[x][y] = "S," + numPassengers + "," + boxHealth;
         }
-        int xVal = Integer.parseInt(x);
-        int yVal = Integer.parseInt(y);
-        parsedGrid[xVal][yVal] = "S"+","+passengers+","+boxHealth;
+
+        // int comma = 0;
+        // String x = "";
+        // String y = "";
+        // String passengers = "";
+        // String boxHealth = "";
+        // for(int i=0 ; i<ships.length() ; i++){
+        //     if(ships.charAt(i)==','){
+        //         if(comma == 3){
+        //            comma = 0;
+        //            int xVal = Integer.parseInt(x);
+        //            int yVal = Integer.parseInt(y);
+        //            parsedGrid[xVal][yVal] = "S"+","+passengers+","+boxHealth;
+        //            x = "";
+        //            y = "";
+        //            passengers = "";
+        //            boxHealth = "";
+        //         }
+        //         else 
+        //            comma++;
+        //     }
+        //     else if(comma == 0)
+        //         x += ships.charAt(i);
+        //     else if(comma == 1)
+        //         y += ships.charAt(i);
+        //     else if(comma == 2)
+        //         passengers += ships.charAt(i);
+        //     else 
+        //         boxHealth += ships.charAt(i);
+                
+        // }
+        // int xVal = Integer.parseInt(x);
+        // int yVal = Integer.parseInt(y);
+        // parsedGrid[xVal][yVal] = "S"+","+passengers+","+boxHealth;
     }
 
     private static void putShipsInGridInitial(String ships, String[][] parsedGrid) {
@@ -386,7 +397,9 @@ public class CoastGuard extends SearchProblem{
         Random rand = new Random();
 
         int m = rand.nextInt(11)+5;
+        // int m = rand.nextInt(5)+1;
         int n = rand.nextInt(11)+5;
+        // int n = rand.nextInt(5)+1;
         // Cell string format: "type{;numOfPassengers;BoxHealth}", where:
         // {;numOfPassengers;BoxHealth} is added if type is ship
         String [][] grid = new String[n][m];
@@ -458,7 +471,7 @@ public class CoastGuard extends SearchProblem{
         }
         // 3. adjust format of strings
         stationString = stationString.substring(0, stationString.length() - 1) + ";";
-        shipString = shipString.substring(0, shipString.length() - 1) + ";";
+        shipString = shipString.substring(0, shipString.length() - 1);
 
         // 4. add info to grid string and return
         gridString += stationString + shipString;
@@ -496,14 +509,14 @@ public class CoastGuard extends SearchProblem{
                     if (cell[0].equals("I"))
                         stationString += i + "," + j + ",";
                     else if (cell[0].equals("S")) {
-                        shipString += i + "," + j + "," + cell[1] + ","+cell[2];
+                        shipString += i + "," + j + "," + cell[1] + ","+cell[2] + ",";
                     }
                 }
             }
         }
         // 3. adjust format of strings
         stationString = stationString.substring(0, stationString.length() - 1) + ";";
-        shipString = shipString.substring(0, shipString.length() - 1) + ";";
+        shipString = shipString.substring(0, shipString.length() - 1);
 
         // 4. add info to grid string and return
         gridString += stationString + shipString;
@@ -512,14 +525,17 @@ public class CoastGuard extends SearchProblem{
 
     private void printState(Object[] state) {
         String parsedGrid=(String) state[0];
+        String[][] arr = deserializeGrid(parsedGrid);
+        for (int i = 0; i < arr.length; i++) {
+            for (int j = 0; j < arr[0].length; j++) {
+                System.out.print(arr[i][j] + ' ');
+            }
+            System.out.println();
+        }
+        
         String location=(String)state[2];
         int capacity=(int)state[1];
-       // for(int i = 0; i< parsedGrid.length; i++){
-          //  for(int j = 0; j< parsedGrid[0].length; j++){
-        //        System.out.print(parsedGrid[i] + " ");
-           // }
-        //    System.out.println();
-        //}
+
         System.out.println(parsedGrid);
         System.out.println("Coast guard : " + location + " and " + capacity);
     }
@@ -535,17 +551,17 @@ public class CoastGuard extends SearchProblem{
 
     // Driver code
     public static void main(String[] args) {
-        System.out.println(genGrid());
-        String s = "5,7;200;3,4;1,2,4,5;4,6,100,2,2,50,1,6,30";
-        CoastGuard cg = new CoastGuard(genGrid());
+        String s = genGrid();
+        System.out.println(s);
+        CoastGuard cg = new CoastGuard(s);
         cg.printState(cg.initialState);
-        String s2 = "5,7;1,2,4,5;4,6,100,15,2,2,50,10,1,6,30,3";
-        String[][] toPrintGrid = deserializeGrid(s2);
-        for (int i = 0; i < toPrintGrid.length; i++) {
-            for (int j = 0; j < toPrintGrid[0].length; j++) {
-                System.out.print(toPrintGrid[i][j] + " ");
-            }
-            System.out.println();
-        }
+
+        // String[][] toPrintGrid = deserializeGrid(s);
+        // for (int i = 0; i < toPrintGrid.length; i++) {
+        //     for (int j = 0; j < toPrintGrid[0].length; j++) {
+        //         System.out.print(toPrintGrid[i][j] + " ");
+        //     }
+        //     System.out.println();
+        // }
     }
 }
