@@ -1,20 +1,13 @@
 package code;
 
 public class TreeNode {
-    Object[] state;
+    Object state;
     TreeNode parent;
     Object operator;
     int depth;
     int[] pathCost;
 
-    public TreeNode(Object[] state, TreeNode parent, Object operator, int depth) {
-        this.state = state;
-        this.parent = parent;
-        this.operator = operator;
-        this.depth = depth;
-    }
-
-    public TreeNode(Object[] state, TreeNode parent, Object operator, int depth,int[] pathCost) {
+    public TreeNode(Object state, TreeNode parent, Object operator, int depth,int[] pathCost) {
         this.state = state;
         this.parent = parent;
         this.operator = operator;
