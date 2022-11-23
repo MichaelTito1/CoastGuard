@@ -108,9 +108,9 @@ public class CoastGuard extends SearchProblem{
                 }
             }
         }
-        if(!(nodeGrid[coastGuardY][coastGuardX].equals("E") || (nodeGrid[coastGuardY][coastGuardX]).equals("I"))){
-            String[] currentCoastGuardCell = nodeGrid[coastGuardY][coastGuardX].split(",");
-            String[] parentCoastGuardCell = nodeGrid[coastGuardY][coastGuardX].split(","); //the previous state of the cell where the coast guard is in now
+        if(!(nodeGrid[coastGuardX][coastGuardY].equals("E") || (nodeGrid[coastGuardX][coastGuardY]).equals("I"))){
+            String[] currentCoastGuardCell = nodeGrid[coastGuardX][coastGuardY].split(",");
+            String[] parentCoastGuardCell = nodeGrid[coastGuardX][coastGuardY].split(","); //the previous state of the cell where the coast guard is in now
             if(node.operator == Operators.PICKUP && Integer.parseInt(currentCoastGuardCell[1])==0 && Integer.parseInt(parentCoastGuardCell[1])>0){
                 cost[0] -= 1; //subtracts the one death calculated for the cell of coastguard
             }
@@ -170,7 +170,6 @@ public class CoastGuard extends SearchProblem{
             return false;
         return true;
     }
-
 
     private TreeNode expandDrop(String[][] grid, int capacity, int[] cgLocation, TreeNode node) {
         String[][] newStateGrid=getNextMovementGridState(grid);
@@ -300,7 +299,7 @@ public class CoastGuard extends SearchProblem{
                 if(comma){
                     int xVal = Integer.parseInt(x);
                     int yVal = Integer.parseInt(y);
-                    parsedGrid[yVal][xVal] = "I";
+                    parsedGrid[xVal][yVal] = "I";
                     x = "";
                     y = "";
                 }
@@ -313,7 +312,7 @@ public class CoastGuard extends SearchProblem{
         }
         int xVal = Integer.parseInt(x);
         int yVal = Integer.parseInt(y);
-        parsedGrid[yVal][xVal] = "I";
+        parsedGrid[xVal][yVal] = "I";
     }
 
     private static void putShipsInGrid(String ships, String[][] parsedGrid) {
@@ -328,7 +327,7 @@ public class CoastGuard extends SearchProblem{
                    comma = 0;
                    int xVal = Integer.parseInt(x);
                    int yVal = Integer.parseInt(y);
-                   parsedGrid[yVal][xVal] = "S"+","+passengers+","+boxHealth;
+                   parsedGrid[xVal][yVal] = "S"+","+passengers+","+boxHealth;
                    x = "";
                    y = "";
                    passengers = "";
@@ -349,7 +348,7 @@ public class CoastGuard extends SearchProblem{
         }
         int xVal = Integer.parseInt(x);
         int yVal = Integer.parseInt(y);
-        parsedGrid[yVal][xVal] = "S"+","+passengers+","+boxHealth;
+        parsedGrid[xVal][yVal] = "S"+","+passengers+","+boxHealth;
     }
 
     private static void putShipsInGridInitial(String ships, String[][] parsedGrid) {
@@ -363,7 +362,7 @@ public class CoastGuard extends SearchProblem{
                    comma = 0;
                    int xVal = Integer.parseInt(x);
                    int yVal = Integer.parseInt(y);
-                   parsedGrid[yVal][xVal] = "S"+","+passengers+",20";
+                   parsedGrid[xVal][yVal] = "S"+","+passengers+",20";
                    x = "";
                    y = "";
                    passengers = "";
@@ -380,7 +379,7 @@ public class CoastGuard extends SearchProblem{
         }
         int xVal = Integer.parseInt(x);
         int yVal = Integer.parseInt(y);
-        parsedGrid[yVal][xVal] = "S"+","+passengers+",20";
+        parsedGrid[xVal][yVal] = "S"+","+passengers+",20";
     }
 
     public static String genGrid(){
@@ -394,7 +393,7 @@ public class CoastGuard extends SearchProblem{
 
         // generating coast guard's data
         int maxCapacity = rand.nextInt(71)+30;
-        int cgX = rand.nextInt(m), cgY = rand.nextInt(n);
+        int cgX = rand.nextInt(n), cgY = rand.nextInt(m);
 
         // generating ships randomly
         int numShips = rand.nextInt(n*m-1) + 1;
@@ -450,9 +449,9 @@ public class CoastGuard extends SearchProblem{
                     String[] cell = grid[i][j].split(";");
 
                     if (cell[0].equals("I"))
-                        stationString += j + "," + i + ",";
+                        stationString += i + "," + j + ",";
                     else if (cell[0].equals("S")) {
-                        shipString += j + "," + i + "," + cell[1] + ",";
+                        shipString += i + "," + j + "," + cell[1] + ",";
                     }
                 }
             }
@@ -495,9 +494,9 @@ public class CoastGuard extends SearchProblem{
                     String[] cell = grid[i][j].split(",");
 
                     if (cell[0].equals("I"))
-                        stationString += j + "," + i + ",";
+                        stationString += i + "," + j + ",";
                     else if (cell[0].equals("S")) {
-                        shipString += j + "," + i + "," + cell[1] + ","+cell[2];
+                        shipString += i + "," + j + "," + cell[1] + ","+cell[2];
                     }
                 }
             }
