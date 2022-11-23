@@ -538,14 +538,15 @@ public class CoastGuard extends SearchProblem{
     public static void main(String[] args) {
         System.out.println(genGrid());
         String s = "5,7;200;3,4;1,2,4,5;4,6,100,2,2,50,1,6,30";
-        CoastGuard cg=new CoastGuard(genGrid());
+        CoastGuard cg = new CoastGuard(genGrid());
         cg.printState(cg.initialState);
         String s2 = "5,7;1,2,4,5;4,6,100,15,2,2,50,10,1,6,30,3";
         String[][] toPrintGrid = deserializeGrid(s2);
-        for(int i=0; i<toPrintGrid.length ; i++){
-            for(int j=0 ; j<toPrintGrid[0].length ; j++){
+        for (int i = 0; i < toPrintGrid.length; i++) {
+            for (int j = 0; j < toPrintGrid[0].length; j++) {
                 System.out.print(toPrintGrid[i][j] + " ");
             }
             System.out.println();
         }
+    }
 }
