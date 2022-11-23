@@ -25,8 +25,32 @@ public class CoastGuard extends SearchProblem{
 
     @Override
     public boolean goalTest(TreeNode node) {
-        // TODO Auto-generated method stub
+        // state = {grid, capacity, location}
+        String[][] curGrid = (String[][]) node.state[0];
+        for (int i = 0; i < curGrid.length; i++) {
+            for (int j = 0; j < curGrid[0].length; j++) {
+                
+            }
+        }
         return false;
+    }
+
+    /**
+     * This method converts the string representation of a grid cell 
+     * 
+     * @param cell
+     * @return
+     */
+    private Object[] deserializeCell(String cell){
+        String[] cellInfo = cell.split(";");
+        Object[] cellArr = new Object[cellInfo.length];
+        String cellType = cellInfo[0];
+        cellArr[0] = cellType;
+        if(cellType.equals("S")){
+            cellArr[1] = Integer.parseInt(cellInfo[1]); // num of passengers on board
+            cellArr[2] = Integer.parseInt(cellInfo[2]); // box health on board
+        }
+        return cellArr;
     }
 
     @Override
@@ -147,7 +171,7 @@ public class CoastGuard extends SearchProblem{
                 int x = rand.nextInt(n), y = rand.nextInt(m);
                 if(grid[x][y] == null){
                     int numPassengers = rand.nextInt(100)+1;
-                    grid[x][y] = "ship;"+numPassengers+";20";
+                    grid[x][y] = "S;"+numPassengers+";20";
                     break;
                 }
             }while(true);
@@ -160,7 +184,7 @@ public class CoastGuard extends SearchProblem{
             do{
                 int x = rand.nextInt(n), y = rand.nextInt(m);
                 if(grid[x][y] == null){
-                    grid[x][y] = "station";
+                    grid[x][y] = "I";
                     break;
                 }
             }while(true);
@@ -193,9 +217,9 @@ public class CoastGuard extends SearchProblem{
                 if (grid[i][j] != null) {
                     String[] cell = grid[i][j].split(";");
 
-                    if (cell[0].equals("station"))
+                    if (cell[0].equals("I"))
                         stationString += j + "," + i + ",";
-                    else if (cell[0].equals("ship")) {
+                    else if (cell[0].equals("S")) {
                         shipString += j + "," + i + "," + cell[1] + ",";
                     }
                 }
@@ -233,9 +257,9 @@ public class CoastGuard extends SearchProblem{
                 if (grid[i][j] != null) {
                     String[] cell = grid[i][j].split(";");
 
-                    if (cell[0].equals("station"))
+                    if (cell[0].equals("I"))
                         stationString += j + "," + i + ",";
-                    else if (cell[0].equals("ship")) {
+                    else if (cell[0].equals("S")) {
                         shipString += j + "," + i + "," + cell[1] + ","+cell[2];
                     }
                 }
