@@ -215,9 +215,39 @@ public class CoastGuard extends SearchProblem{
         return null;
     }
 
+    /**
+     * This method converts the 2D grid to a serialized format in a string. 
+     * All cell information (including box health) are serialized. 
+     * @param grid 2D string array containing information for each cell
+     * @return string serialization of grid
+     */
     private static String serializeGrid(String[][] grid){
-        //TODO to be implemented
-        return null;
+        int n=grid.length;
+        int m=grid[0].length;
+        // 2. get ships and stations info from the 2D grid
+        String stationString = "";
+        String shipString = "";
+        String gridString = m+","+n+';';
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < m; j++) {
+                if (grid[i][j] != null) {
+                    String[] cell = grid[i][j].split(";");
+
+                    if (cell[0].equals("station"))
+                        stationString += j + "," + i + ",";
+                    else if (cell[0].equals("ship")) {
+                        shipString += j + "," + i + "," + cell[1] + ","+cell[2];
+                    }
+                }
+            }
+        }
+        // 3. adjust format of strings
+        stationString = stationString.substring(0, stationString.length() - 1) + ";";
+        shipString = shipString.substring(0, shipString.length() - 1) + ";";
+
+        // 4. add info to grid string and return
+        gridString += stationString + shipString;
+        return gridString;
     }
 
     private void printState(Object[] state) {
