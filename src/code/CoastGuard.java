@@ -70,24 +70,6 @@ public class CoastGuard extends SearchProblem{
         return cellArr;
     }
 
-    /**
-     * This method converts the string representation of a grid cell 
-     * 
-     * @param cell
-     * @return
-     */
-    private Object[] deserializeCell(String cell){
-        String[] cellInfo = cell.split(";");
-        Object[] cellArr = new Object[cellInfo.length];
-        String cellType = cellInfo[0];
-        cellArr[0] = cellType;
-        if(cellType.equals("S")){
-            cellArr[1] = Integer.parseInt(cellInfo[1]); // num of passengers on board
-            cellArr[2] = Integer.parseInt(cellInfo[2]); // box health on board
-        }
-        return cellArr;
-    }
-
     @Override
     public int[] pathCost(TreeNode node) {
         //getting position of coast guard
