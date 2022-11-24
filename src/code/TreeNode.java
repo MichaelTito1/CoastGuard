@@ -1,6 +1,6 @@
 package code;
 
-public class TreeNode {
+abstract public class TreeNode {
     Object state;
     TreeNode parent;
     Object operator;

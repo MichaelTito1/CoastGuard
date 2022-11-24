@@ -1,6 +1,8 @@
 package code;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Random;
 
 public class CoastGuard extends SearchProblem{
@@ -30,7 +32,10 @@ public class CoastGuard extends SearchProblem{
         getInitialStateOfProblem(generatedGrid);
         maxCapacity= getInitialState().capacity;
     }
-
+    @Override
+     public TreeNode makeNode(SearchProblem problem){
+        return new CoastGuardTreeNode(((CoastGuard)problem).getInitialState(), null,null,0,new int[2]);
+   }
     /**
      * This method checks if the given node's state is a goal state
      * @param n the current node
@@ -41,7 +46,7 @@ public class CoastGuard extends SearchProblem{
         CoastGuardTreeNode node=(CoastGuardTreeNode) n;
         // state = {grid, capacity, location}
         // if coast guard still has passengers on board, return false
-        if(node.getState().capacity > 0)
+        if(node.getState().capacity != maxCapacity)
             return false;
         
         Cell[][] curGrid = deserializeGrid(node.getState().grid);
@@ -188,7 +193,7 @@ public class CoastGuard extends SearchProblem{
     }
 
     private boolean canDrop(Cell[][] grid, int[] cgLocation) {
-        Cell cell= (Station) grid[cgLocation[0]][cgLocation[1]];
+        Cell cell=  grid[cgLocation[0]][cgLocation[1]];
         return cell.isStation();
     }
 
@@ -528,19 +533,80 @@ public class CoastGuard extends SearchProblem{
         }
     }
 
+    public static String solve(String grid, String strategy , boolean visualize){
+          CoastGuard cg = new CoastGuard(grid);
+          QingFun qf = parseStrategy(strategy);
+          CoastGuardTreeNode cgt = (CoastGuardTreeNode) genericSearchProcedure(cg, qf);
+          CoastGuardTreeNode[] nodePath = getAllParentNodes(cgt);
+          String[] operators = getAllParentsOperations(nodePath);
+          String nodeState = cgt.getState().grid;
+          int boxesRetrieved = getRetrievedBoxes(nodeState);
+          int deathsCases = cgt.pathCost[0];
+          long expandedNodes=qf.expandedNodes;
+          return constructSolveOutput(operators,deathsCases,boxesRetrieved,expandedNodes);
+    }
+
+    private static String constructSolveOutput(String[] operators, int deathsCases, int boxesRetrieved,
+                long expandedNodes) {
+                String output = "";
+                for(int i=0 ; i<operators.length-1 ; i++ ){
+                    output+= operators[i] + ",";
+                }
+                output += operators[operators.length -1];
+                output += ";" + deathsCases + ";" + boxesRetrieved + ";" + expandedNodes;
+                return output;
+    }
+
+    private static int getRetrievedBoxes(String nodeState) {
+        int boxes = 0;
+        Cell[][] nodeGrid = deserializeGrid(nodeState);
+        for(int i=0 ; i<nodeGrid.length ; i++){
+            for(int j=0 ; j<nodeGrid[0].length ; j++){
+                if(nodeGrid[i][j].isShip()){
+                    Ship ship = (Ship) nodeGrid[i][j];
+                    if(ship.boxRetrieved)
+                      boxes++;
+                }
+            }
+        }
+        return boxes;
+    }
+
+    private static CoastGuardTreeNode[] getAllParentNodes(CoastGuardTreeNode cgt) {
+          ArrayList<CoastGuardTreeNode> nodes = new ArrayList<>();
+          while(cgt != null){
+            nodes.add(cgt);
+            cgt = cgt.getParent();
+          }
+          Collections.reverse(nodes);
+          return (CoastGuardTreeNode[]) nodes.toArray();
+    }
+
+    private static String[] getAllParentsOperations(CoastGuardTreeNode[] cgt) {
+        String[] operators = new String[cgt.length];
+        for(int i=0 ; i<cgt.length ; i++){
+           operators[i] = (String) cgt[i].operator;
+        }
+        return operators;
+    }
+
+    public static QingFun parseStrategy(String strategy){
+        if(strategy.equals("BF")){
+            return new BFS();
+        }
+        return null;
+    }
+
+
+
     // Driver code
     public static void main(String[] args) {
-        String s = genGrid();
-        System.out.println(s);
-        CoastGuard cg = new CoastGuard(s);
-        cg.printState(cg.getInitialState());
-
-        // String[][] toPrintGrid = deserializeGrid(s);
-        // for (int i = 0; i < toPrintGrid.length; i++) {
-        //     for (int j = 0; j < toPrintGrid[0].length; j++) {
-        //         System.out.print(toPrintGrid[i][j] + " ");
-        //     }
-        //     System.out.println();
-        // }
+        // String s = genGrid();
+        // System.out.println(s);
+        // BFS bfs = new BFS();
+        // CoastGuard cg = new CoastGuard(s);
+        // cg.printState(cg.getInitialState());
+        // CoastGuardTreeNode node = (CoastGuardTreeNode) CoastGuard.genericSearchProcedure(cg,bfs);
+        System.out.println(CoastGuard.solve(genGrid(), "BF", false));
     }
 }
