@@ -2,6 +2,7 @@ package code;
 
 public abstract class QingFun {
     Object queue;
+    long expandedNodes;
 
     abstract void makeQ(TreeNode root);
 
@@ -10,4 +11,8 @@ public abstract class QingFun {
     abstract TreeNode getNextNode();
 
     abstract void enqueue(TreeNode[] nodes);
+
+    public void incrementExpndedNodes(){
+        expandedNodes++;
+    }
 }

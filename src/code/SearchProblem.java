@@ -2,7 +2,7 @@ package code;
 
 public abstract class SearchProblem {
     Object[] operators;
-    Object[] initialState;//TODO class state a7san?
+    Object initialState;//TODO class state a7san?
     Object[] stateSpace;
 
 
@@ -10,18 +10,20 @@ public abstract class SearchProblem {
    abstract public int[] pathCost(TreeNode node);
    abstract public TreeNode[] expand(TreeNode node);
 
-   public static TreeNode genericSearchProblem(SearchProblem problem,QingFun qf){
-        qf.makeQ(makeNode(problem));
+   public static TreeNode genericSearchProcedure(SearchProblem problem,QingFun qf){
+        qf.makeQ(problem.makeNode(problem));
         while(!qf.qIsEmpty()){
             TreeNode currentNode=qf.getNextNode();
-            if(problem.goalTest(currentNode)){
+            boolean test = problem.goalTest(currentNode); 
+            System.out.println("test="+test);
+            if(test){
                 return currentNode;
             }
+
             qf.enqueue(problem.expand(currentNode));
+            qf.incrementExpndedNodes();
         }
         return null;
    }
-   public static TreeNode makeNode(SearchProblem problem){
-        return new TreeNode(problem.initialState, null,null,0,new int[2]);
-   }
+   abstract public TreeNode makeNode(SearchProblem problem);
 }

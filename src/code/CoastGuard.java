@@ -1,6 +1,8 @@
 package code;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Random;
 
 public class CoastGuard extends SearchProblem{
@@ -15,6 +17,10 @@ public class CoastGuard extends SearchProblem{
         this(genGrid());
     }
 
+    public CoastGuardState getInitialState(){
+        return (CoastGuardState) initialState;
+    }
+
     public CoastGuard(String generatedGrid){
         operators=new Operators[]{
                 Operators.LEFT, Operators.RIGHT,
@@ -22,35 +28,36 @@ public class CoastGuard extends SearchProblem{
                 Operators.PICKUP,Operators.DROP,
                 Operators.RETRIEVE};
         //state: SerializedGrid,capacity,location
-        initialState=new Object[3];
-        getInitialState(generatedGrid);
-        maxCapacity=(int)initialState[1];
+        initialState=new CoastGuardState();
+        getInitialStateOfProblem(generatedGrid);
+        maxCapacity= getInitialState().capacity;
     }
-
+    @Override
+     public TreeNode makeNode(SearchProblem problem){
+        return new CoastGuardTreeNode(((CoastGuard)problem).getInitialState(), null,null,0,new int[2]);
+   }
     /**
      * This method checks if the given node's state is a goal state
-     * @param node the current node
+     * @param n the current node
      * @return true if it passes the goal test, false otherwise
      */
     @Override
-    public boolean goalTest(TreeNode node) {
+    public boolean goalTest(TreeNode n) {
+        CoastGuardTreeNode node=(CoastGuardTreeNode) n;
         // state = {grid, capacity, location}
         // if coast guard still has passengers on board, return false
-        if(Integer.parseInt((String) node.state[1]) > 0)
+        if(node.getState().capacity != maxCapacity)
             return false;
         
-        int passengers = 0;
-        int boxes = 0;
-        String[][] curGrid = (String[][]) node.state[0];
+        Cell[][] curGrid = deserializeGrid(node.getState().grid);
         for (int i = 0; i < curGrid.length; i++) {
             for (int j = 0; j < curGrid[0].length; j++) {
-                Object[] cell = deserializeCell(curGrid[i][j]);
-                if(cell[0].equals("S")){ // check for passengers and box on ship
-                    passengers = Integer.parseInt((String) cell[1]);
-                    boxes = Integer.parseInt((String) cell[1]) > 0 ? 1 : 0;
+                Cell cell = curGrid[i][j];
+                if(cell.isShip()){ // check for passengers and box on ship
+                    Ship ship = (Ship) cell; 
+                    if(ship.passengersAlive > 0 || (ship.boxHealth > 0 && !ship.boxRetrieved) )
+                        return false;
                 }
-                if(passengers > 0 || boxes > 0) // if there are alive passengers or unretrieved boxes, return false
-                    return false;
             }
         }
         return true;
@@ -62,17 +69,17 @@ public class CoastGuard extends SearchProblem{
      * @param cell
      * @return
      */
-    private Object[] deserializeCell(String cell){
-        String[] cellInfo = cell.split(",");
-        Object[] cellArr = new Object[cellInfo.length];
-        String cellType = cellInfo[0];
-        cellArr[0] = cellType;
-        if(cellType.equals("S")){
-            cellArr[1] = Integer.parseInt(cellInfo[1]); // num of passengers on board
-            cellArr[2] = Integer.parseInt(cellInfo[2]); // box health on board
-        }
-        return cellArr;
-    }
+    // private Object[] deserializeCell(Cell cell){
+    //     String[] cellInfo = cell.split(",");
+    //     Object[] cellArr = new Object[cellInfo.length];
+    //     String cellType = cellInfo[0];
+    //     cellArr[0] = cellType;
+    //     if(cellType.equals("S")){
+    //         cellArr[1] = Integer.parseInt(cellInfo[1]); // num of passengers on board
+    //         cellArr[2] = Integer.parseInt(cellInfo[2]); // box health on board
+    //     }
+    //     return cellArr;
+    // }
 
     private String serializeCell(Object[] cell){
         String[] strCell=new String[cell.length];
@@ -83,42 +90,47 @@ public class CoastGuard extends SearchProblem{
     }
 
     @Override
-    public int[] pathCost(TreeNode node) {
+    public int[] pathCost(TreeNode n) {
+        CoastGuardTreeNode node=(CoastGuardTreeNode) n;
         //getting position of coast guard
-        String coastGuardPosition = (String)node.state[2];
-        String [] coastGuardPositionSplitted = coastGuardPosition.split(",");
-        int coastGuardX = Integer.parseInt(coastGuardPositionSplitted[0]);
-        int coastGuardY = Integer.parseInt(coastGuardPositionSplitted[1]);
+        // String coastGuardPosition = node.getState().cgLocation;
+        // String [] coastGuardPositionSplitted = coastGuardPosition.split(",");
+        // int coastGuardX = Integer.parseInt(coastGuardPositionSplitted[0]);
+        // int coastGuardY = Integer.parseInt(coastGuardPositionSplitted[1]);
 
         int[] cost = new int[2];
         if(node.parent == null) //root node
             return cost;
-        String[][] parentGrid = deserializeGrid((String)node.parent.state[0]); //parent Grid State
-        String[][] nodeGrid = deserializeGrid((String)node.state[0]); //node Grid State
+        // Cell[][] parentGrid = deserializeGrid(node.getParent().getState().grid); //parent Grid State
+        Cell[][] nodeGrid = deserializeGrid(node.getState().grid); //node Grid State
         for(int i=0 ; i<nodeGrid.length ; i++){
             for(int j=0 ; j<nodeGrid[0].length ; j++){
-                if(!(nodeGrid[i][j].equals("E") || (nodeGrid[i][j]).equals("I"))){
-                        String[] shipInfo = parentGrid[i][j].split(",");
-                        if(Integer.parseInt(shipInfo[1])>0){
-                               cost[0] += 1; //m x n x 2
-                        }
-                        else if(Integer.parseInt(shipInfo[2])==1){
+                if(nodeGrid[i][j].isShip()){
+                        Ship shipInfo = (Ship) nodeGrid[i][j];
+                        // if(shipInfo.passengersAlive>0){
+                        //        cost[0] += 1; //m x n x 2
+                        // }
+                        // else if(shipInfo.boxHealth==1 && !shipInfo.boxRetrieved){ // TODO: Is there a better way to check for boxes that are about to be destroyed????
+                        //     cost[1] += 1;
+                        // }
+                        cost[0] += shipInfo.deadPassengers;
+                        if(!shipInfo.boxRetrieved && shipInfo.boxHealth <= 0) 
                             cost[1] += 1;
-                        }
                 }
             }
         }
-        if(!(nodeGrid[coastGuardX][coastGuardY].equals("E") || (nodeGrid[coastGuardX][coastGuardY]).equals("I"))){
-            String[] currentCoastGuardCell = nodeGrid[coastGuardX][coastGuardY].split(",");
-            String[] parentCoastGuardCell = nodeGrid[coastGuardX][coastGuardY].split(","); //the previous state of the cell where the coast guard is in now
-            if(node.operator == Operators.PICKUP && Integer.parseInt(currentCoastGuardCell[1])==0 && Integer.parseInt(parentCoastGuardCell[1])>0){
-                cost[0] -= 1; //subtracts the one death calculated for the cell of coastguard
-            }
-            else if(node.operator == Operators.RETRIEVE && Integer.parseInt(parentCoastGuardCell[2])>0){
-                cost[1] -= 1;
-            }
+        // TODO: is there a better way to check for correctness of cost?
+        // if(nodeGrid[coastGuardX][coastGuardY].isShip()){
+        //     Ship currentCoastGuardCell = (Ship) nodeGrid[coastGuardX][coastGuardY];
+        //     Ship parentCoastGuardCell = (Ship) parentGrid[coastGuardX][coastGuardY]; //the previous state of the cell where the coast guard is in now
+        //     if(node.operator == Operators.PICKUP && currentCoastGuardCell.passengersAlive==0 && parentCoastGuardCell.passengersAlive>0){
+        //         cost[0] -= 1; //subtracts the one death calculated for the cell of coastguard
+        //     }
+        //     else if(node.operator == Operators.RETRIEVE && parentCoastGuardCell.boxHealth > 0){
+        //         cost[1] -= 1;
+        //     }
 
-        }
+        // }
         node.pathCost = cost;
         return cost;
         // if(!node.state.equals(this.initialState[0])){
@@ -129,11 +141,12 @@ public class CoastGuard extends SearchProblem{
     }
 
     @Override
-    public TreeNode[] expand(TreeNode node) {
+    public TreeNode[] expand(TreeNode n) {
+        CoastGuardTreeNode node=(CoastGuardTreeNode) n;
         //get current state values
-        String[][] grid = deserializeGrid((String) node.state[0]);
-        int capacity=(int)node.state[1];
-        int[] cgLocation=getIntTuplesFromString((String) node.state[2]);
+        Cell[][] grid = deserializeGrid(node.getState().grid);
+        int capacity=node.getState().capacity;
+        int[] cgLocation=getIntTuplesFromString(node.getState().cgLocation);
 
         ArrayList<TreeNode> expandedNodes=new ArrayList<>();
 
@@ -156,54 +169,58 @@ public class CoastGuard extends SearchProblem{
         return expandedNodes.toArray(new TreeNode[0]);
     }
 
-    private TreeNode expandRetrieve(String[][] grid, int capacity, int[] cgLocation, TreeNode node) {
-        String[][] newStateGrid=getNextMovementGridState(grid);
-        Object[] cell=deserializeCell(grid[cgLocation[0]][cgLocation[1]]);
-        cell[2]=-1;
-        newStateGrid[cgLocation[0]][cgLocation[1]]=serializeCell(cell);
-        return new TreeNode(new Object[]{serializeGrid(newStateGrid),capacity,cgLocation},node,Operators.RETRIEVE, node.depth+1);
+    // TODO: Revise box retrieval mechanism. Check in pathcost that boxRetrieved and boxHealth
+    private CoastGuardTreeNode expandRetrieve(Cell[][] grid, int capacity, int[] cgLocation, CoastGuardTreeNode node) {
+        Cell[][] newStateGrid=getNextMovementGridState(grid);
+        Ship cell=( (Ship) grid[cgLocation[0]][cgLocation[1]]).clone();
+        cell.boxRetrieved = true;
+        newStateGrid[cgLocation[0]][cgLocation[1]]= cell;
+        //TODO: fix this to make location in state int[] mara wa7da
+        return new CoastGuardTreeNode(new CoastGuardState(serializeGrid(newStateGrid),capacity,cgLocation[0]+","+cgLocation[1]),node,Operators.RETRIEVE, node.depth+1);
     }
 
-    private boolean canRetrieve(String[][] grid, int[] cgLocation) {
-        Object[] cell=deserializeCell(grid[cgLocation[0]][cgLocation[1]]);
-        if(!cell[0].equals("S")||(int)cell[2]<=0)
+    private boolean canRetrieve(Cell[][] grid, int[] cgLocation) {
+        Cell cell= grid[cgLocation[0]][cgLocation[1]];
+        if(!cell.isShip()|| ((Ship)cell).boxHealth <= 0 || ((Ship)cell).boxRetrieved)
             return false;
         return true;
     }
 
-    private TreeNode expandDrop(String[][] grid, int capacity, int[] cgLocation, TreeNode node) {
-        String[][] newStateGrid=getNextMovementGridState(grid);
+    private CoastGuardTreeNode expandDrop(Cell[][] grid, int capacity, int[] cgLocation, CoastGuardTreeNode node) {
+        Cell[][] newStateGrid=getNextMovementGridState(grid);
         capacity=maxCapacity;
-        return new TreeNode(new Object[]{serializeGrid(newStateGrid),capacity,cgLocation},node,Operators.DROP, node.depth+1);
+        return new CoastGuardTreeNode(new CoastGuardState(serializeGrid(newStateGrid),capacity,cgLocation[0]+","+cgLocation[1]),node,Operators.DROP, node.depth+1);
     }
 
-    private boolean canDrop(String[][] grid, int[] cgLocation) {
-        Object[] cell=deserializeCell(grid[cgLocation[0]][cgLocation[1]]);
-        return cell[0].equals("I");
+    private boolean canDrop(Cell[][] grid, int[] cgLocation) {
+        Cell cell=  grid[cgLocation[0]][cgLocation[1]];
+        return cell.isStation();
     }
 
-    private TreeNode expandPickup(String[][] grid, int capacity, int[] cgLocation, TreeNode node) {
-        String[][] newStateGrid=getNextMovementGridState(grid);
-        Object[] cell=deserializeCell(grid[cgLocation[0]][cgLocation[1]]);
-        cell[1]=Math.max(0,(int)cell[1]-capacity);
-        capacity=Math.max(0,capacity-(int)cell[1]);
-        newStateGrid[cgLocation[0]][cgLocation[1]]=serializeCell(cell);
-        return new TreeNode(new Object[]{serializeGrid(newStateGrid),capacity,cgLocation},node,Operators.PICKUP, node.depth+1);
+    private CoastGuardTreeNode expandPickup(Cell[][] grid, int capacity, int[] cgLocation, CoastGuardTreeNode node) {
+        Cell[][] newStateGrid=getNextMovementGridState(grid);
+        Ship cell= ((Ship) grid[cgLocation[0]][cgLocation[1]]).clone();
+        cell.passengersAlive++;
+        cell.deadPassengers--;
+        cell.passengersAlive=Math.max(0, cell.passengersAlive - capacity);
+        capacity=Math.max(0,capacity-cell.passengersAlive);
+        newStateGrid[cgLocation[0]][cgLocation[1]]= cell;
+        return new CoastGuardTreeNode(new CoastGuardState(serializeGrid(newStateGrid),capacity,cgLocation[0]+","+cgLocation[1]),node,Operators.PICKUP, node.depth+1);
     }
 
-    private boolean canPickUp(String[][] grid, int capacity, int[] cgLocation) {
+    private boolean canPickUp(Cell[][] grid, int capacity, int[] cgLocation) {
         if(capacity==0)
             return false;
-        Object[] cell=deserializeCell(grid[cgLocation[0]][cgLocation[1]]);
-        if(!cell[0].equals("S")||(int)cell[1]==0)
+        Cell cell= grid[cgLocation[0]][cgLocation[1]];
+        if(!cell.isShip() || ((Ship)cell).passengersAlive ==0)
             return false;
         return true;
     }
 
-    private ArrayList<TreeNode> expandMovement(TreeNode parent,String[][] grid,int capacity, int[] cgLocation) {
+    private ArrayList<TreeNode> expandMovement(CoastGuardTreeNode parent,Cell[][] grid,int capacity, int[] cgLocation) {
         ArrayList<TreeNode> res=new ArrayList<>();
 
-        String[][] newStateGrid= getNextMovementGridState(grid);
+        Cell[][] newStateGrid= getNextMovementGridState(grid);
 
         res.add(expandMovementUp(newStateGrid,capacity,cgLocation,parent));
         res.add(expandMovementDown(newStateGrid,capacity,cgLocation,parent));
@@ -212,60 +229,61 @@ public class CoastGuard extends SearchProblem{
         return res;
     }
 
-    private String[][] getNextMovementGridState(String[][] grid) {
-        String[][] newGridState=new String[grid.length][grid[0].length];
-        for (int i = 0; i < grid.length; i++) {
-            for (int j = 0; j < grid[0].length; j++) {
-                Object[] cell=deserializeCell(grid[i][j]);
-                if(cell[0].equals("S")){
-                    if((int)cell[1]==0){
-                        if((int)cell[2]>0)
-                            cell[2]=(int)cell[2]-1;
-                    }else{
-                        cell[1]=(int)cell[1]-1;
-                    }
-                }
-                newGridState[i][j]=serializeCell(cell);
-            }
-        }
-        return newGridState;
-    }
-
-    private TreeNode expandMovementUp(String[][] newStateGrid,int capacity, int[] cgLocation,TreeNode parent) {
+    private CoastGuardTreeNode expandMovementUp(Cell[][] newStateGrid,int capacity, int[] cgLocation,CoastGuardTreeNode parent) {
         int[] upLocation;
         if(cgLocation[1]==0)
             upLocation = new int[]{cgLocation[0],cgLocation[1]};
         else
             upLocation= new int[]{cgLocation[0],cgLocation[1]-1};
-        return new TreeNode(new Object[]{serializeGrid(newStateGrid),capacity,upLocation},parent,Operators.UP,parent.depth+1);
+        return new CoastGuardTreeNode(new CoastGuardState(serializeGrid(newStateGrid),capacity,upLocation[0]+","+upLocation[1]),parent,Operators.UP,parent.depth+1);
     }
 
-    private TreeNode expandMovementDown(String[][] newStateGrid,int capacity, int[] cgLocation,TreeNode parent) {
+    private CoastGuardTreeNode expandMovementDown(Cell[][] newStateGrid,int capacity, int[] cgLocation,CoastGuardTreeNode parent) {
         int[] downLocation;
         if(cgLocation[1]==newStateGrid[0].length-1)
             downLocation = new int[]{cgLocation[0],cgLocation[1]};
         else
             downLocation= new int[]{cgLocation[0],cgLocation[1]+1};
-        return new TreeNode(new Object[]{serializeGrid(newStateGrid),capacity,downLocation},parent,Operators.DOWN,parent.depth+1);
+        return new CoastGuardTreeNode(new CoastGuardState(serializeGrid(newStateGrid),capacity,downLocation[0]+","+downLocation[1]),parent,Operators.DOWN,parent.depth+1);
     }
 
-    private TreeNode expandMovementLeft(String[][] newStateGrid,int capacity, int[] cgLocation,TreeNode parent) {
+    private CoastGuardTreeNode expandMovementLeft(Cell[][] newStateGrid,int capacity, int[] cgLocation,CoastGuardTreeNode parent) {
         int[] leftLocation;
         if(cgLocation[0]==0)
             leftLocation = new int[]{cgLocation[0],cgLocation[1]};
         else
             leftLocation= new int[]{cgLocation[0]-1,cgLocation[1]};
-        return new TreeNode(new Object[]{serializeGrid(newStateGrid),capacity,leftLocation},parent,Operators.LEFT,parent.depth+1);
+        return new CoastGuardTreeNode(new CoastGuardState(serializeGrid(newStateGrid),capacity,leftLocation[0]+","+leftLocation[1]),parent,Operators.LEFT,parent.depth+1);
     }
 
-    private TreeNode expandMovementRight(String[][] newStateGrid,int capacity, int[] cgLocation,TreeNode parent) {
+    private CoastGuardTreeNode expandMovementRight(Cell[][] newStateGrid,int capacity, int[] cgLocation,CoastGuardTreeNode parent) {
         int[] rightLocation;
         if(cgLocation[0]==newStateGrid.length-1)
             rightLocation = new int[]{cgLocation[0],cgLocation[1]};
         else
             rightLocation= new int[]{cgLocation[0]+1,cgLocation[1]};
-        return new TreeNode(new Object[]{serializeGrid(newStateGrid),capacity,rightLocation},parent,Operators.RIGHT,parent.depth+1);
+        return new CoastGuardTreeNode(new CoastGuardState(serializeGrid(newStateGrid),capacity,rightLocation[0]+","+rightLocation[1]),parent,Operators.RIGHT,parent.depth+1);
 
+    }
+
+    private Cell[][] getNextMovementGridState(Cell[][] grid) {
+        Cell[][] newGridState=new Cell[grid.length][grid[0].length];
+        for (int i = 0; i < grid.length; i++) {
+            for (int j = 0; j < grid[0].length; j++) {
+                Cell cell= grid[i][j];
+                if(cell.isShip()){
+                    Ship ship = ((Ship) cell).clone();
+                    if(ship.passengersAlive==0){
+                        if(ship.boxHealth>0 && !ship.boxRetrieved)
+                            ship.boxHealth--;
+                    }else{
+                        ship.killPassenger();
+                    }
+                }
+                newGridState[i][j]= cell;
+            }
+        }
+        return newGridState;
     }
     
     private static int[] getIntTuplesFromString(String firstPortion){
@@ -275,23 +293,23 @@ public class CoastGuard extends SearchProblem{
         return(new int[]{m,n});
     }
 
-    public void getInitialState(String grid){
+    public void getInitialStateOfProblem(String grid){
       String[] splitted = grid.split(";");
       int[] dimensions = getIntTuplesFromString(splitted[0]);
-      String[][] parsedGrid = new String[dimensions[1]][dimensions[0]];
+      Cell[][] parsedGrid = new Cell[dimensions[1]][dimensions[0]];
       int maxCapacity = Integer.parseInt(splitted[1]);
-      initialState[2] = splitted[2];
-      initialState[1] = maxCapacity;
+      getInitialState().cgLocation = splitted[2];
+      getInitialState().capacity = maxCapacity;
       putStationsInGrid(splitted[3],parsedGrid);
       putShipsInGridInitial(splitted[4],parsedGrid);
       removeNullsFromGrid(parsedGrid);
-      initialState[0]=serializeGrid(parsedGrid);
-      System.out.println("serializeGrid = " + initialState[0]);
+      getInitialState().grid=serializeGrid(parsedGrid);
+      System.out.println("serializeGrid = " + getInitialState().grid);
     }
 
 
 
-    private static void putStationsInGrid(String stations, String[][]parsedGrid) {
+    private static void putStationsInGrid(String stations, Cell[][]parsedGrid) {
         boolean comma = false;
         String x = "";
         String y = "";
@@ -300,7 +318,7 @@ public class CoastGuard extends SearchProblem{
                 if(comma){
                     int xVal = Integer.parseInt(x);
                     int yVal = Integer.parseInt(y);
-                    parsedGrid[xVal][yVal] = "I";
+                    parsedGrid[xVal][yVal] = new Station();
                     x = "";
                     y = "";
                 }
@@ -313,10 +331,10 @@ public class CoastGuard extends SearchProblem{
         }
         int xVal = Integer.parseInt(x);
         int yVal = Integer.parseInt(y);
-        parsedGrid[xVal][yVal] = "I";
+        parsedGrid[xVal][yVal] = new Station();
     }
 
-    private static void putShipsInGrid(String ships, String[][] parsedGrid) {
+    private static void putShipsInGrid(String ships, Cell[][] parsedGrid) {
         // string ships = {x,y,pass,boxHealth}*
         String[] shipInfo = ships.split(",");
         for (int i = 0; i < shipInfo.length-4; i+=4) {
@@ -324,45 +342,11 @@ public class CoastGuard extends SearchProblem{
             int y = Integer.parseInt(shipInfo[i+1]);
             int numPassengers = Integer.parseInt(shipInfo[i+2]);
             int boxHealth = Integer.parseInt(shipInfo[i+3]);
-            parsedGrid[x][y] = "S," + numPassengers + "," + boxHealth;
+            parsedGrid[x][y] = new Ship(numPassengers, boxHealth);
         }
-
-        // int comma = 0;
-        // String x = "";
-        // String y = "";
-        // String passengers = "";
-        // String boxHealth = "";
-        // for(int i=0 ; i<ships.length() ; i++){
-        //     if(ships.charAt(i)==','){
-        //         if(comma == 3){
-        //            comma = 0;
-        //            int xVal = Integer.parseInt(x);
-        //            int yVal = Integer.parseInt(y);
-        //            parsedGrid[xVal][yVal] = "S"+","+passengers+","+boxHealth;
-        //            x = "";
-        //            y = "";
-        //            passengers = "";
-        //            boxHealth = "";
-        //         }
-        //         else 
-        //            comma++;
-        //     }
-        //     else if(comma == 0)
-        //         x += ships.charAt(i);
-        //     else if(comma == 1)
-        //         y += ships.charAt(i);
-        //     else if(comma == 2)
-        //         passengers += ships.charAt(i);
-        //     else 
-        //         boxHealth += ships.charAt(i);
-                
-        // }
-        // int xVal = Integer.parseInt(x);
-        // int yVal = Integer.parseInt(y);
-        // parsedGrid[xVal][yVal] = "S"+","+passengers+","+boxHealth;
     }
 
-    private static void putShipsInGridInitial(String ships, String[][] parsedGrid) {
+    private static void putShipsInGridInitial(String ships, Cell[][] parsedGrid) {
         int comma = 0;
         String x = "";
         String y = "";
@@ -373,7 +357,7 @@ public class CoastGuard extends SearchProblem{
                    comma = 0;
                    int xVal = Integer.parseInt(x);
                    int yVal = Integer.parseInt(y);
-                   parsedGrid[xVal][yVal] = "S"+","+passengers+",20";
+                   parsedGrid[xVal][yVal] = new Ship(Integer.parseInt(passengers));
                    x = "";
                    y = "";
                    passengers = "";
@@ -390,7 +374,7 @@ public class CoastGuard extends SearchProblem{
         }
         int xVal = Integer.parseInt(x);
         int yVal = Integer.parseInt(y);
-        parsedGrid[xVal][yVal] = "S"+","+passengers+",20";
+        parsedGrid[xVal][yVal] = new Ship(Integer.parseInt(passengers));
     }
 
     public static String genGrid(){
@@ -478,10 +462,10 @@ public class CoastGuard extends SearchProblem{
         return gridString;
     }
 
-    private static String[][] deserializeGrid(String serializedString){
+    private static Cell[][] deserializeGrid(String serializedString){
         String[] splitted = serializedString.split(";");
         int[] dimensions = getIntTuplesFromString(splitted[0]);
-        String[][] stateParsedGrid = new String[dimensions[1]][dimensions[0]];
+        Cell[][] stateParsedGrid = new Cell[dimensions[1]][dimensions[0]];
         putStationsInGrid(splitted[1],stateParsedGrid);
         putShipsInGrid(splitted[2],stateParsedGrid);
         removeNullsFromGrid(stateParsedGrid);
@@ -494,7 +478,7 @@ public class CoastGuard extends SearchProblem{
      * @param grid 2D string array containing information for each cell
      * @return string serialization of grid
      */
-    private static String serializeGrid(String[][] grid){
+    private static String serializeGrid(Cell[][] grid){
         int n=grid.length;
         int m=grid[0].length;
         // 2. get ships and stations info from the 2D grid
@@ -503,13 +487,13 @@ public class CoastGuard extends SearchProblem{
         String gridString = m+","+n+';';
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < m; j++) {
-                if (!(grid[i][j].equals("E"))) {
-                    String[] cell = grid[i][j].split(",");
-
-                    if (cell[0].equals("I"))
+                if (!grid[i][j].isEmpty()) {
+                    // String[] cell = grid[i][j].split(",");
+                    Cell cell = grid[i][j];
+                    if (cell.isStation()) 
                         stationString += i + "," + j + ",";
-                    else if (cell[0].equals("S")) {
-                        shipString += i + "," + j + "," + cell[1] + ","+cell[2] + ",";
+                    else if (cell.isShip()) {
+                        shipString += i + "," + j + "," + ((Ship)cell).passengersAlive + ","+ ((Ship)cell).boxHealth + ",";
                     }
                 }
             }
@@ -523,45 +507,106 @@ public class CoastGuard extends SearchProblem{
         return gridString;
     }
 
-    private void printState(Object[] state) {
-        String parsedGrid=(String) state[0];
-        String[][] arr = deserializeGrid(parsedGrid);
+    private void printState(CoastGuardState state) {
+        String parsedGrid= state.grid;
+        Cell[][] arr = deserializeGrid(parsedGrid);
         for (int i = 0; i < arr.length; i++) {
             for (int j = 0; j < arr[0].length; j++) {
-                System.out.print(arr[i][j] + ' ');
+                System.out.print(arr[i][j].toString() + ' ');
             }
             System.out.println();
         }
         
-        String location=(String)state[2];
-        int capacity=(int)state[1];
+        String location= state.cgLocation;
+        int capacity= state.capacity;
 
         System.out.println(parsedGrid);
         System.out.println("Coast guard : " + location + " and " + capacity);
     }
 
-    private static void removeNullsFromGrid(String[][] grid){
+    private static void removeNullsFromGrid(Cell[][] grid){
         for(int i=0 ; i<grid.length ; i++){
             for(int j=0 ; j<grid[0].length ; j++){
                 if(grid[i][j]==null)
-                   grid[i][j] = "E";
+                   grid[i][j] = new Empty();
             }
         }
     }
 
+    public static String solve(String grid, String strategy , boolean visualize){
+          CoastGuard cg = new CoastGuard(grid);
+          QingFun qf = parseStrategy(strategy);
+          CoastGuardTreeNode cgt = (CoastGuardTreeNode) genericSearchProcedure(cg, qf);
+          CoastGuardTreeNode[] nodePath = getAllParentNodes(cgt);
+          String[] operators = getAllParentsOperations(nodePath);
+          String nodeState = cgt.getState().grid;
+          int boxesRetrieved = getRetrievedBoxes(nodeState);
+          int deathsCases = cgt.pathCost[0];
+          long expandedNodes=qf.expandedNodes;
+          return constructSolveOutput(operators,deathsCases,boxesRetrieved,expandedNodes);
+    }
+
+    private static String constructSolveOutput(String[] operators, int deathsCases, int boxesRetrieved,
+                long expandedNodes) {
+                String output = "";
+                for(int i=0 ; i<operators.length-1 ; i++ ){
+                    output+= operators[i] + ",";
+                }
+                output += operators[operators.length -1];
+                output += ";" + deathsCases + ";" + boxesRetrieved + ";" + expandedNodes;
+                return output;
+    }
+
+    private static int getRetrievedBoxes(String nodeState) {
+        int boxes = 0;
+        Cell[][] nodeGrid = deserializeGrid(nodeState);
+        for(int i=0 ; i<nodeGrid.length ; i++){
+            for(int j=0 ; j<nodeGrid[0].length ; j++){
+                if(nodeGrid[i][j].isShip()){
+                    Ship ship = (Ship) nodeGrid[i][j];
+                    if(ship.boxRetrieved)
+                      boxes++;
+                }
+            }
+        }
+        return boxes;
+    }
+
+    private static CoastGuardTreeNode[] getAllParentNodes(CoastGuardTreeNode cgt) {
+          ArrayList<CoastGuardTreeNode> nodes = new ArrayList<>();
+          while(cgt != null){
+            nodes.add(cgt);
+            cgt = cgt.getParent();
+          }
+          Collections.reverse(nodes);
+          return (CoastGuardTreeNode[]) nodes.toArray();
+    }
+
+    private static String[] getAllParentsOperations(CoastGuardTreeNode[] cgt) {
+        String[] operators = new String[cgt.length];
+        for(int i=0 ; i<cgt.length ; i++){
+           operators[i] = (String) cgt[i].operator;
+        }
+        return operators;
+    }
+
+    public static QingFun parseStrategy(String strategy){
+        if(strategy.equals("BF")){
+            return new BFS();
+        }
+        return null;
+    }
+
+
+
     // Driver code
     public static void main(String[] args) {
-        String s = genGrid();
-        System.out.println(s);
-        CoastGuard cg = new CoastGuard(s);
-        cg.printState(cg.initialState);
-
-        // String[][] toPrintGrid = deserializeGrid(s);
-        // for (int i = 0; i < toPrintGrid.length; i++) {
-        //     for (int j = 0; j < toPrintGrid[0].length; j++) {
-        //         System.out.print(toPrintGrid[i][j] + " ");
-        //     }
-        //     System.out.println();
-        // }
+        // String s = genGrid();
+        // System.out.println(s);
+        // BFS bfs = new BFS();
+        // CoastGuard cg = new CoastGuard(s);
+        // cg.printState(cg.getInitialState());
+        // CoastGuardTreeNode node = (CoastGuardTreeNode) CoastGuard.genericSearchProcedure(cg,bfs);
+        System.out.println(CoastGuard.solve(genGrid(), "BF", false));
     }
 }

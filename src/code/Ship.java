@@ -14,6 +14,22 @@ public class Ship extends Cell{
         boxRetrieved=false;
     }
 
+    public Ship(int passengersAlive, int boxHealth) {
+        cellType=CellType.SHIP;
+        this.passengersAlive = passengersAlive;
+        deadPassengers=0;
+        this.boxHealth=boxHealth;
+        boxRetrieved=false;
+    }
+
+    public Ship(int passengersAlive, int dead, int boxHealth, boolean retrieved) {
+        cellType=CellType.SHIP;
+        this.passengersAlive = passengersAlive;
+        deadPassengers=dead;
+        this.boxHealth=boxHealth;
+        boxRetrieved=retrieved;
+    }
+
     public void killPassenger(){
         deadPassengers++;
         passengersAlive--;
@@ -27,5 +43,12 @@ public class Ship extends Cell{
         boxHealth--;
     }
 
+    @Override
+    public String toString() {
+        return "S,"+passengersAlive+","+boxHealth;
+    }
 
+    protected Ship clone(){
+        return new Ship(passengersAlive, deadPassengers, boxHealth, boxRetrieved);
+    }
 }
