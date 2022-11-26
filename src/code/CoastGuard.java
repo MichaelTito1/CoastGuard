@@ -579,13 +579,6 @@ public class CoastGuard extends SearchProblem{
           return constructSolveOutput(operators,deathsCases,boxesRetrieved,expandedNodes);
     }
 
-    private static void visualize(CoastGuardTreeNode[] nodePath) {
-        for (CoastGuardTreeNode cur: nodePath
-             ) {
-            visualize(cur);
-        }
-    }
-
     private static String constructSolveOutput(Operators[] operators, int deathsCases, int boxesRetrieved,
                 long expandedNodes) {
                 String output = "";
@@ -651,26 +644,40 @@ public class CoastGuard extends SearchProblem{
     /**
      * This method visualizes the given grid in the console.
      * @param grid a 2D array of type Cell, representing the array.
+     * @param cgLocation
      */
-    public static void visualize(Cell[][] grid){
+    public static void visualize(Cell[][] grid, String cgLocation){
+        int n = grid.length;
         int m = grid[0].length;
-        String form = "";
+        String form = "", formCgPos = "";
+        int[] cgCoordinates = getIntTuplesFromString(cgLocation);
+        int x = cgCoordinates[0], y = cgCoordinates[1];
         for (int i = 0; i < m; i++) {
             form += "%15s";
+            if(i == y)
+                formCgPos += "[%13s]";
+            else
+                formCgPos += "%15s";
         }
         form += "%n";
-        for (Cell[] cells : grid) {
-            System.out.format(form, cells);
+        for (int i = 0; i < n; i++) {
+            Cell [] cells = grid[i];
+            if(i == x){
+                System.out.format(formCgPos, cells);
+                System.out.println();
+            }else
+                System.out.format(form, cells);
         }
     }
     
     /**
      * This method visualizes the given grid in the console.
      * @param gridStr a string representing the array. It has the following format: "m,n;[stationX,stationY]*;[shipX,shipY,numPassengers,box]*"
+     * @param cgLocation
      */
-    public static void visualize(String gridStr){
+    public static void visualize(String gridStr, String cgLocation){
         Cell[][] grid = deserializeGrid(gridStr);
-        visualize(grid);
+        visualize(grid, cgLocation);
     }
     
     /**
@@ -684,9 +691,17 @@ public class CoastGuard extends SearchProblem{
             System.out.println("Operator: "+node.operator + ", " + "Path cost: "+Arrays.toString(node.pathCost)
                     + ", " +"depth: "+ node.depth);
         }
-        visualize(state.grid);
+        visualize(state.grid, state.cgLocation);
         System.out.println("=================================");
     }
+
+    private static void visualize(CoastGuardTreeNode[] nodePath) {
+        for (CoastGuardTreeNode cur: nodePath
+             ) {
+            visualize(cur);
+        }
+    }
+
 
     // Driver code
     public static void main(String[] args) {
