@@ -1,7 +1,6 @@
 package code;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Random;
 
@@ -484,6 +483,10 @@ public class CoastGuard extends SearchProblem{
         return gridString;
     }
 
+    /**
+     * this method expects a serialized string representing the grid, and returns the cell converted to a 2D array of type Cell
+     * @param serializedString the grid is serialized in the following format: "m,n;[stationX,stationY]*;[shipX,shipY,numPassengers,box]*"
+     */
     private static Cell[][] deserializeGrid(String serializedString){
         String[] splitted = serializedString.split(";");
         int[] dimensions = getIntTuplesFromString(splitted[0]);
@@ -498,7 +501,7 @@ public class CoastGuard extends SearchProblem{
      * This method converts the 2D grid to a serialized format in a string. 
      * All cell information (including box health) are serialized. 
      * @param grid 2D string array containing information for each cell
-     * @return string serialization of grid
+     * @return string serialization of grid in the following format: "m,n;[stationX,stationY]*;[shipX,shipY,numPassengers,box]*"
      */
     private static String serializeGrid(Cell[][] grid){
         int n=grid.length;
@@ -624,16 +627,44 @@ public class CoastGuard extends SearchProblem{
         return null;
     }
 
+    /**
+     * This method visualizes the given grid in the console.
+     * @param grid a 2D array of type Cell, representing the array.
+     */
+    public static void visualize(Cell[][] grid){
+        int m = grid[0].length;
+        String form = "";
+        for (int i = 0; i < m; i++) {
+            form += "%12s";
+        }
+        form += "%n";
+        for (Cell[] cells : grid) {
+            System.out.format(form, cells);
+        }
+    }
+    
+    /**
+     * This method visualizes the given grid in the console.
+     * @param gridStr a string representing the array. It has the following format: "m,n;[stationX,stationY]*;[shipX,shipY,numPassengers,box]*"
+     */
+    public static void visualize(String gridStr){
+        Cell[][] grid = deserializeGrid(gridStr);
+        visualize(grid);
+    }
 
 
     // Driver code
     public static void main(String[] args) {
-        // String s = genGrid();
-        // System.out.println(s);
+        String s = genGrid();
+        System.out.println(s);
         // BFS bfs = new BFS();
-        // CoastGuard cg = new CoastGuard(s);
+        CoastGuard cg = new CoastGuard(s);
         // cg.printState(cg.getInitialState());
         // CoastGuardTreeNode node = (CoastGuardTreeNode) CoastGuard.genericSearchProcedure(cg,bfs);
-        System.out.println(CoastGuard.solve("5,6;50;0,1;0,4,3,3;1,1,90;", "BF", false));
+        // System.out.println(CoastGuard.solve(genGrid(), "BF", false));
+
+        // testing visualize
+        // String g = "3,4;0,1;3,2,65,20";
+        CoastGuard.visualize(cg.getInitialState().grid);
     }
 }
