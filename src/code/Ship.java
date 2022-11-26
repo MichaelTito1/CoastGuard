@@ -45,7 +45,7 @@ public class Ship extends Cell{
 
     @Override
     public String toString() {
-        return "S,"+passengersAlive+","+boxHealth;
+        return "S,"+passengersAlive+","+deadPassengers+","+boxHealth+","+boxRetrieved;
     }
 
     protected Ship clone(){
