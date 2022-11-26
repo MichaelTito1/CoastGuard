@@ -46,8 +46,8 @@ public class CoastGuard extends SearchProblem{
         CoastGuardTreeNode node=(CoastGuardTreeNode) n;
         // state = {grid, capacity, location}
         // if coast guard still has passengers on board, return false
-        System.out.println("capacity = " + node.getState().capacity);
-        System.out.println("maxCapacity = " + maxCapacity);
+        //System.out.println("capacity = " + node.getState().capacity);
+        //System.out.println("maxCapacity = " + maxCapacity);
         if(node.getState().capacity != maxCapacity)
             return false;
         
@@ -58,7 +58,7 @@ public class CoastGuard extends SearchProblem{
                 Cell cell = curGrid[i][j];
                 if(cell.isShip()){ // check for passengers and box on ship
                     Ship ship = (Ship) cell; 
-                    System.out.println(ship.passengersAlive);
+                    //System.out.println(ship.passengersAlive);
                     if(ship.passengersAlive > 0 || (ship.boxHealth > 0 && !ship.boxRetrieved) )
                         return false;
                 }
@@ -208,7 +208,7 @@ public class CoastGuard extends SearchProblem{
         cell.passengersAlive=Math.max(0, passengers2 - capacity);
         capacity=Math.max(0,capacity-passengers2);
         newStateGrid[cgLocation[0]][cgLocation[1]]= cell;
-        System.out.println(newStateGrid[cgLocation[0]][cgLocation[1]].toString());
+        //System.out.println(newStateGrid[cgLocation[0]][cgLocation[1]].toString());
         return new CoastGuardTreeNode(new CoastGuardState(serializeGrid(newStateGrid),capacity,cgLocation[0]+","+cgLocation[1]),node,Operators.PICKUP, node.depth+1);
     }
 
@@ -309,7 +309,7 @@ public class CoastGuard extends SearchProblem{
       putShipsInGridInitial(splitted[4],parsedGrid);
       removeNullsFromGrid(parsedGrid);
       getInitialState().grid=serializeGrid(parsedGrid);
-      System.out.println("serializeGrid = " + getInitialState().grid);
+      //System.out.println("serializeGrid = " + getInitialState().grid);
     }
 
 
@@ -582,7 +582,7 @@ public class CoastGuard extends SearchProblem{
     private static void visualize(CoastGuardTreeNode[] nodePath) {
         for (CoastGuardTreeNode cur: nodePath
              ) {
-            visualize(cur.getState().grid);
+            visualize(cur);
         }
     }
 
@@ -677,17 +677,21 @@ public class CoastGuard extends SearchProblem{
      */
     public static void visualize(CoastGuardTreeNode node){
         CoastGuardState state = node.getState();
-        System.out.println(node.operator + ", " + Arrays.toString(node.pathCost) + ", " + node.depth);
+        System.out.println("Coast Guard Position: "+node.getState().cgLocation);
+        if(node.parent!=null){
+            System.out.println("Operator: "+node.operator + ", " + "Path cost: "+Arrays.toString(node.pathCost)
+                    + ", " +"depth: "+ node.depth);
+        }
         visualize(state.grid);
         System.out.println("=================================");
     }
 
     // Driver code
     public static void main(String[] args) {
-        String s = genGrid();
-        System.out.println(s);
+        //String s = genGrid();
+        //System.out.println(s);
         // BFS bfs = new BFS();
-        CoastGuard cg = new CoastGuard(s);
+        //CoastGuard cg = new CoastGuard(s);
         // cg.printState(cg.getInitialState());
         // CoastGuardTreeNode node = (CoastGuardTreeNode) CoastGuard.genericSearchProcedure(cg,bfs);
         System.out.println(CoastGuard.solve("3,4;97;1,2;0,1;3,2,65;", "BF", true));

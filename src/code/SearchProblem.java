@@ -15,7 +15,7 @@ public abstract class SearchProblem {
         while(!qf.qIsEmpty()){
             TreeNode currentNode=qf.getNextNode();
             boolean test = problem.goalTest(currentNode); 
-            System.out.println("test="+test);
+            //System.out.println("test="+test);
             if(test){
                 return currentNode;
             }
