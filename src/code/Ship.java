@@ -31,6 +31,8 @@ public class Ship extends Cell{
     }
 
     public void killPassenger(){
+        if(passengersAlive<=0)
+            return;
         deadPassengers++;
         passengersAlive--;
     }
