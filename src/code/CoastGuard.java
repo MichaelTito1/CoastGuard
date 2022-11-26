@@ -1,6 +1,7 @@
 package code;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Random;
 
@@ -669,7 +670,17 @@ public class CoastGuard extends SearchProblem{
         Cell[][] grid = deserializeGrid(gridStr);
         visualize(grid);
     }
-
+    
+    /**
+     * This method visualizes the given node in the console.
+     * @param node
+     */
+    public static void visualize(CoastGuardTreeNode node){
+        CoastGuardState state = node.getState();
+        System.out.println(node.operator + ", " + Arrays.toString(node.pathCost) + ", " + node.depth);
+        visualize(state.grid);
+        System.out.println("=================================");
+    }
 
     // Driver code
     public static void main(String[] args) {
