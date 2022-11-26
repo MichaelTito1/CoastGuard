@@ -203,8 +203,6 @@ public class CoastGuard extends SearchProblem{
     private CoastGuardTreeNode expandPickup(Cell[][] grid, int capacity, int[] cgLocation, CoastGuardTreeNode node) {
         Cell[][] newStateGrid=getNextMovementGridState(grid);
         Ship cell= ((Ship) grid[cgLocation[0]][cgLocation[1]]).clone();
-        cell.passengersAlive++;
-        cell.deadPassengers--;
         int passengers2 = cell.passengersAlive;
         cell.passengersAlive=Math.max(0, passengers2 - capacity);
         capacity=Math.max(0,capacity-passengers2);
@@ -574,7 +572,17 @@ public class CoastGuard extends SearchProblem{
           int boxesRetrieved = getRetrievedBoxes(nodeState);
           int deathsCases = cgt.pathCost[0];
           long expandedNodes=qf.expandedNodes;
+          if(visualize){
+              visualize(nodePath);
+          }
           return constructSolveOutput(operators,deathsCases,boxesRetrieved,expandedNodes);
+    }
+
+    private static void visualize(CoastGuardTreeNode[] nodePath) {
+        for (CoastGuardTreeNode cur: nodePath
+             ) {
+            visualize(cur.getState().grid);
+        }
     }
 
     private static String constructSolveOutput(Operators[] operators, int deathsCases, int boxesRetrieved,
@@ -645,7 +653,7 @@ public class CoastGuard extends SearchProblem{
         int m = grid[0].length;
         String form = "";
         for (int i = 0; i < m; i++) {
-            form += "%12s";
+            form += "%15s";
         }
         form += "%n";
         for (Cell[] cells : grid) {
@@ -671,13 +679,13 @@ public class CoastGuard extends SearchProblem{
         CoastGuard cg = new CoastGuard(s);
         // cg.printState(cg.getInitialState());
         // CoastGuardTreeNode node = (CoastGuardTreeNode) CoastGuard.genericSearchProcedure(cg,bfs);
-        //System.out.println(CoastGuard.solve("3,4;97;1,2;0,1;3,2,65;", "BF", false));
-        System.out.println(CoastGuard.solve("3,4;97;1,2;0,1;3,2,65;", "DF", false));
+        System.out.println(CoastGuard.solve("3,4;97;1,2;0,1;3,2,65;", "BF", true));
+        //System.out.println(CoastGuard.solve("3,4;97;1,2;0,1;3,2,65;", "DF", false));
 
         // System.out.println(CoastGuard.solve(genGrid(), "BF", false));
 
         // testing visualize
         // String g = "3,4;0,1;3,2,65,20";
-        CoastGuard.visualize(cg.getInitialState().grid);
+        //CoastGuard.visualize(cg.getInitialState().grid);
     }
 }
