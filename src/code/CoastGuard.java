@@ -185,7 +185,7 @@ public class CoastGuard extends SearchProblem{
 
     private boolean canRetrieve(Cell[][] grid, int[] cgLocation) {
         Cell cell= grid[cgLocation[0]][cgLocation[1]];
-        if(!cell.isShip()|| ((Ship)cell).boxHealth <= 0 || ((Ship)cell).boxRetrieved)
+        if(!cell.isShip()|| ((Ship)cell).passengersAlive > 0 || ((Ship)cell).boxHealth <= 0 || ((Ship)cell).boxRetrieved)
             return false;
         return true;
     }
@@ -712,7 +712,7 @@ public class CoastGuard extends SearchProblem{
         // cg.printState(cg.getInitialState());
         // CoastGuardTreeNode node = (CoastGuardTreeNode) CoastGuard.genericSearchProcedure(cg,bfs);
         //System.out.println(CoastGuard.solve("3,4;97;1,2;0,1;3,2,65;", "BF", true));
-        System.out.println(CoastGuard.solve("3,4;97;1,2;0,1;3,2,65;", "ID", true));
+        System.out.println(CoastGuard.solve("6,6;50;4,1;0,4,3,3;1,1,90;", "DF", true));
         //System.out.println(CoastGuard.solve("3,4;97;1,2;0,1;3,2,65;", "DF", false));
 
         // System.out.println(CoastGuard.solve(genGrid(), "BF", false));
