@@ -10,9 +10,15 @@ public class AS extends QingFun{
     public AS(Heuristic heuristic){
         this.heuristic=heuristic;
         queue=new PriorityQueue<TreeNode>((a, b)->{
-            int aCost=heuristic.heuristicCost(a)+a.pathCost[0]*400+a.pathCost[1];
-            int bCost=heuristic.heuristicCost(b)+b.pathCost[0]*400+b.pathCost[1];
-            return aCost-bCost;
+            int[] aCost=heuristic.heuristicCost(a);
+            aCost[0]+=a.pathCost[0];
+            aCost[1]+=a.pathCost[1];
+            int[] bCost=heuristic.heuristicCost(b);
+            bCost[0]+=b.pathCost[0];
+            bCost[1]+=b.pathCost[1];
+            if(aCost[0]==bCost[0])
+                return aCost[1]-bCost[1];
+            return aCost[0]-bCost[0];
         });
         statesEnqueued=new HashSet<>();
     }

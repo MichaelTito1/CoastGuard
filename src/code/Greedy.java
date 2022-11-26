@@ -7,7 +7,13 @@ public class Greedy extends QingFun{
     Heuristic heuristic;
     public Greedy(Heuristic heuristic){
         this.heuristic=heuristic;
-        queue=new PriorityQueue<TreeNode>((a,b)->{return heuristic.heuristicCost(a)- heuristic.heuristicCost(b);});
+        queue=new PriorityQueue<TreeNode>((a,b)->{
+            int[] aCost=heuristic.heuristicCost(a);
+            int[] bCost=heuristic.heuristicCost(b);
+            if(aCost[0]==bCost[0])
+                return aCost[1]-bCost[1];
+            return aCost[0]-bCost[0];
+        });
         statesEnqueued=new HashSet<>();
     }
     @Override
