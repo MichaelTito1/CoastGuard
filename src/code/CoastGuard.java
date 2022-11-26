@@ -641,6 +641,8 @@ public class CoastGuard extends SearchProblem{
                 return new BFS();
             case "DF":
                 return new DFS();
+            case "ID":
+                return new ID();
             default:
                 throw new NullPointerException();
         }
@@ -694,7 +696,8 @@ public class CoastGuard extends SearchProblem{
         //CoastGuard cg = new CoastGuard(s);
         // cg.printState(cg.getInitialState());
         // CoastGuardTreeNode node = (CoastGuardTreeNode) CoastGuard.genericSearchProcedure(cg,bfs);
-        System.out.println(CoastGuard.solve("3,4;97;1,2;0,1;3,2,65;", "BF", true));
+        //System.out.println(CoastGuard.solve("3,4;97;1,2;0,1;3,2,65;", "BF", true));
+        System.out.println(CoastGuard.solve("3,4;97;1,2;0,1;3,2,65;", "ID", true));
         //System.out.println(CoastGuard.solve("3,4;97;1,2;0,1;3,2,65;", "DF", false));
 
         // System.out.println(CoastGuard.solve(genGrid(), "BF", false));
