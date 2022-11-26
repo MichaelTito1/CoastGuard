@@ -21,7 +21,7 @@ public abstract class SearchProblem {
             }
 
             qf.enqueue(problem.expand(currentNode));
-            qf.incrementExpndedNodes();
+            qf.incrementExpandedNodes();
         }
         return null;
    }

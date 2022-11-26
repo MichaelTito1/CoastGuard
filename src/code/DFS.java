@@ -1,20 +1,18 @@
 package code;
 
-import java.util.Arrays;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.Queue;
+import java.util.Stack;
 
-public class BFS extends QingFun{
+public class DFS extends QingFun{
 
-    public BFS(){
-        queue=new LinkedList<TreeNode>();
+    public DFS(){
+        queue=new Stack<TreeNode>();
         statesEnqueued=new HashSet<>();
     }
-
     @Override
     void makeQ(TreeNode root) {
-        getQueue().add(root);
+        getQueue().push(root);
         statesEnqueued.add(root.state);
     }
 
@@ -25,21 +23,20 @@ public class BFS extends QingFun{
 
     @Override
     TreeNode getNextNode() {
-        return getQueue().remove();
+        return getQueue().pop();
     }
 
     @Override
     void enqueue(TreeNode[] nodes) {
         for (TreeNode node:
-             nodes) {
+                nodes) {
             if(!statesEnqueued.contains(node.state)){
-                getQueue().add(node);
+                getQueue().push(node);
                 statesEnqueued.add(node.state);
             }
         }
     }
-
-    private Queue<TreeNode> getQueue(){
-        return (Queue<TreeNode>)queue;
+    private Stack<TreeNode> getQueue(){
+        return (Stack<TreeNode>)queue;
     }
 }
