@@ -42,9 +42,8 @@ public class AS extends QingFun{
     void enqueue(TreeNode[] nodes) {
         for (TreeNode node:
                 nodes) {
-            if(!statesEnqueued.contains(node.state)){
+            if(statesEnqueued.add(node.state)){
                 getQueue().add(node);
-                statesEnqueued.add(node.state);
             }
         }
     }

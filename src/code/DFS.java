@@ -30,9 +30,8 @@ public class DFS extends QingFun{
     void enqueue(TreeNode[] nodes) {
         for (TreeNode node:
                 nodes) {
-            if(!statesEnqueued.contains(node.state)){
+            if(statesEnqueued.add(node.state)){
                 getQueue().push(node);
-                statesEnqueued.add(node.state);
             }
         }
     }
