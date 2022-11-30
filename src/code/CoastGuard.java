@@ -473,7 +473,7 @@ public class CoastGuard extends SearchProblem{
      * this method expects a serialized string representing the grid, and returns the cell converted to a 2D array of type Cell
      * @param serializedString the grid is serialized in the following format: "m,n;[stationX,stationY]*;[shipX,shipY,numPassengers,box]*"
      */
-    private static Cell[][] deserializeGrid(String serializedString){
+    public static Cell[][] deserializeGrid(String serializedString){
         String[] splitted = serializedString.split(";");
         int[] dimensions = getIntTuplesFromString(splitted[0]);
         Cell[][] stateParsedGrid = new Cell[dimensions[1]][dimensions[0]];
@@ -700,14 +700,14 @@ public class CoastGuard extends SearchProblem{
         //CoastGuard cg = new CoastGuard(s);
         // cg.printState(cg.getInitialState());
         // CoastGuardTreeNode node = (CoastGuardTreeNode) CoastGuard.genericSearchProcedure(cg,bfs);
-        //System.out.println(CoastGuard.solve("3,4;97;1,2;0,1;3,2,65;", "BF", true));
+        //System.out.println(CoastGuard.solve("8,5;60;4,6;2,7;3,4,37,3,5,93,4,0,40;", "BF", true));
         //test 7
         // System.out.println(CoastGuard.solve("6,7;82;1,4;2,3;1,1,58,3,0,58,4,2,72;", "BF", true));
         //test 4
         //System.out.println(CoastGuard.solve("5,7;63;4,2;6,2,6,3;0,0,17,0,2,73,3,0,30;", "UC", true));
         //test 0
-        System.out.println(CoastGuard.solve("5,6;50;0,1;0,4,3,3;1,1,90;", "UC", true));
-        //System.out.println(CoastGuard.solve("3,4;97;1,2;0,1;3,2,65;", "DF", false));
+        //System.out.println(CoastGuard.solve("5,6;50;0,1;0,4,3,3;1,1,90;", "UC", true));
+        System.out.println(CoastGuard.solve("3,4;97;1,2;0,1;3,2,65;", "BF", false));
 
         // System.out.println(CoastGuard.solve(genGrid(), "BF", false));
 
