@@ -4,7 +4,7 @@ import java.util.*;
 
 public class CoastGuard extends SearchProblem{
 
-    int maxCapacity;
+    static int maxCapacity;
 
     enum Operators {
         LEFT,RIGHT,UP,DOWN,PICKUP,DROP,RETRIEVE
@@ -675,7 +675,7 @@ public class CoastGuard extends SearchProblem{
      */
     public static void visualize(CoastGuardTreeNode node){
         CoastGuardState state = node.getState();
-        System.out.println("Coast Guard Position: "+node.getState().cgLocation);
+        System.out.println("Coast Guard Position: "+node.getState().cgLocation + ", Current capacity = " + node.getState().capacity + ", Remaining capacity = " + maxCapacity);
         if(node.parent!=null){
             System.out.println("Operator: "+node.operator + ", " + "Path cost: "+Arrays.toString(node.pathCost)
                     + ", " +"depth: "+ node.depth);
