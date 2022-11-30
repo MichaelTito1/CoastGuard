@@ -174,16 +174,15 @@ public class CoastGuard extends SearchProblem{
     // TODO: Revise box retrieval mechanism. Check in pathcost that boxRetrieved and boxHealth
     private CoastGuardTreeNode expandRetrieve(Cell[][] grid, int capacity, int[] cgLocation, CoastGuardTreeNode node) {
         Cell[][] newStateGrid=getNextMovementGridState(grid);
-        Ship cell=( (Ship) grid[cgLocation[0]][cgLocation[1]]).clone();
+        Ship cell=( (Ship) newStateGrid[cgLocation[0]][cgLocation[1]]);
         cell.boxRetrieved = true;
-        newStateGrid[cgLocation[0]][cgLocation[1]]= cell;
         //TODO: fix this to make location in state int[] mara wa7da
         return new CoastGuardTreeNode(new CoastGuardState(serializeGrid(newStateGrid),capacity,cgLocation[0]+","+cgLocation[1]),node,Operators.RETRIEVE, node.depth+1);
     }
 
     private boolean canRetrieve(Cell[][] grid, int[] cgLocation) {
         Cell cell= grid[cgLocation[0]][cgLocation[1]];
-        if(!cell.isShip()|| ((Ship)cell).passengersAlive > 0 || ((Ship)cell).boxHealth <= 0 || ((Ship)cell).boxRetrieved)
+        if(!cell.isShip()|| ((Ship)cell).passengersAlive > 0 || ((Ship)cell).boxHealth <= 1 || ((Ship)cell).boxRetrieved)
             return false;
         return true;
     }
@@ -553,7 +552,8 @@ public class CoastGuard extends SearchProblem{
           CoastGuard cg = new CoastGuard(grid);
           QingFun qf = parseStrategy(strategy);
           CoastGuardTreeNode cgt = (CoastGuardTreeNode) genericSearchProcedure(cg, qf);
-          System.out.println(cgt);
+          //TODO cover condition where no solution is found and cgt is null
+          //System.out.println(cgt);
           CoastGuardTreeNode[] nodePath = getAllParentNodes(cgt);
           Operators[] operators = getAllParentsOperations(nodePath);
           String nodeState = cgt.getState().grid;
