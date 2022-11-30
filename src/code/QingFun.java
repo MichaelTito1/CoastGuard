@@ -1,7 +1,11 @@
 package code;
 
+import java.util.HashSet;
+
 public abstract class QingFun {
     Object queue;
+    HashSet<Object> statesEnqueued;
+    long expandedNodes;
 
     abstract void makeQ(TreeNode root);
 
@@ -10,4 +14,8 @@ public abstract class QingFun {
     abstract TreeNode getNextNode();
 
     abstract void enqueue(TreeNode[] nodes);
+
+    public void incrementExpandedNodes(){
+        expandedNodes++;
+    }
 }

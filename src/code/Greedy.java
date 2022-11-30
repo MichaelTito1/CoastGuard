@@ -1,17 +1,21 @@
 package code;
 
-import java.util.Arrays;
 import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Queue;
+import java.util.PriorityQueue;
 
-public class BFS extends QingFun{
-
-    public BFS(){
-        queue=new LinkedList<TreeNode>();
+public class Greedy extends QingFun{
+    Heuristic heuristic;
+    public Greedy(Heuristic heuristic){
+        this.heuristic=heuristic;
+        queue=new PriorityQueue<TreeNode>((a,b)->{
+            int[] aCost=heuristic.heuristicCost(a);
+            int[] bCost=heuristic.heuristicCost(b);
+            if(aCost[0]==bCost[0])
+                return aCost[1]-bCost[1];
+            return aCost[0]-bCost[0];
+        });
         statesEnqueued=new HashSet<>();
     }
-
     @Override
     void makeQ(TreeNode root) {
         getQueue().add(root);
@@ -31,15 +35,14 @@ public class BFS extends QingFun{
     @Override
     void enqueue(TreeNode[] nodes) {
         for (TreeNode node:
-             nodes) {
+                nodes) {
             if(!statesEnqueued.contains(node.state)){
                 getQueue().add(node);
                 statesEnqueued.add(node.state);
             }
         }
     }
-
-    private Queue<TreeNode> getQueue(){
-        return (Queue<TreeNode>)queue;
+    private PriorityQueue<TreeNode> getQueue(){
+        return (PriorityQueue<TreeNode>) queue;
     }
 }
