@@ -14,8 +14,7 @@ public abstract class SearchProblem {
         qf.makeQ(problem.makeNode(problem));
         while(!qf.qIsEmpty()){
             TreeNode currentNode=qf.getNextNode();
-            boolean test = problem.goalTest(currentNode); 
-            //System.out.println("test="+test);
+            boolean test = problem.goalTest(currentNode);
             if(test){
                 return currentNode;
             }
