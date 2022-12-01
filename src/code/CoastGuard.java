@@ -129,7 +129,7 @@ public class CoastGuard extends SearchProblem{
             expandedNodes.add(expandPickup(grid,capacity,cgLocation,node));
 
 
-        if(canDrop(grid,cgLocation))
+        if(canDrop(grid,cgLocation,capacity))
             expandedNodes.add(expandDrop(grid,capacity,cgLocation,node));
 
 
@@ -162,9 +162,9 @@ public class CoastGuard extends SearchProblem{
         return new CoastGuardTreeNode(new CoastGuardState(newStateGrid,capacity,cgLocation.clone()),node,Operators.DROP, node.depth+1);
     }
     //TODO add check not to drop if no passengers
-    private boolean canDrop(Cell[][] grid, int[] cgLocation) {
+    private boolean canDrop(Cell[][] grid, int[] cgLocation,int capacity) {
         Cell cell=  grid[cgLocation[0]][cgLocation[1]];
-        return cell.isStation();
+        return cell.isStation()&&capacity<maxCapacity;
     }
 
     private CoastGuardTreeNode expandPickup(Cell[][] grid, int capacity, int[] cgLocation, CoastGuardTreeNode node) {
@@ -642,9 +642,9 @@ public class CoastGuard extends SearchProblem{
         //CoastGuard cg = new CoastGuard(s);
         // cg.printState(cg.getInitialState());
         // CoastGuardTreeNode node = (CoastGuardTreeNode) CoastGuard.genericSearchProcedure(cg,bfs);
-        System.out.println(CoastGuard.solve("3,4;97;1,2;0,1;3,2,10;", "BF", true));
+        //System.out.println(CoastGuard.solve("3,4;97;1,2;0,1;3,2,10;", "BF", true));
         //test 7
-        // System.out.println(CoastGuard.solve("6,7;82;1,4;2,3;1,1,58,3,0,58,4,2,72;", "BF", true));
+        System.out.println(CoastGuard.solve("6,7;82;1,4;2,3;1,1,58,3,0,58,4,2,72;", "AS1", true));
         //test 4
         //System.out.println(CoastGuard.solve("5,7;63;4,2;6,2,6,3;0,0,17,0,2,73,3,0,30;", "AS1", true));
         //test 0
