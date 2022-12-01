@@ -1,5 +1,7 @@
 package code;
 
+import java.util.Objects;
+
 public class Ship extends Cell{
     int passengersAlive;
     int deadPassengers;
@@ -52,5 +54,18 @@ public class Ship extends Cell{
 
     protected Ship clone(){
         return new Ship(passengersAlive, deadPassengers, boxHealth, boxRetrieved);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Ship ship = (Ship) o;
+        return passengersAlive == ship.passengersAlive && deadPassengers == ship.deadPassengers && boxHealth == ship.boxHealth && boxRetrieved == ship.boxRetrieved;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(passengersAlive, deadPassengers, boxHealth, boxRetrieved);
     }
 }

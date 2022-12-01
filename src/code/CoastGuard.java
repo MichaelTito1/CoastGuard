@@ -49,7 +49,7 @@ public class CoastGuard extends SearchProblem{
             return false;
         
         //printState(node.getState());
-        Cell[][] curGrid = deserializeGrid(node.getState().grid);
+        Cell[][] curGrid = node.getState().grid;
         for (int i = 0; i < curGrid.length; i++) {
             for (int j = 0; j < curGrid[0].length; j++) {
                 Cell cell = curGrid[i][j];
@@ -64,12 +64,12 @@ public class CoastGuard extends SearchProblem{
         return true;
     }
 
-    /**
-     * This method converts the string representation of a grid cell 
-     * 
-     * @param cell
-     * @return
-     */
+//    /**
+//     * This method converts the string representation of a grid cell
+//     *
+//     * @param cell
+//     * @return
+//     */
     // private Object[] deserializeCell(Cell cell){
     //     String[] cellInfo = cell.split(",");
     //     Object[] cellArr = new Object[cellInfo.length];
@@ -96,7 +96,7 @@ public class CoastGuard extends SearchProblem{
         int[] cost = new int[2];
         if(node.parent == null) //root node
             return cost;
-        Cell[][] nodeGrid = deserializeGrid(node.getState().grid); //node Grid State
+        Cell[][] nodeGrid = node.getState().grid; //node Grid State
         for(int i=0 ; i<nodeGrid.length ; i++){
             for(int j=0 ; j<nodeGrid[0].length ; j++){
                 if(nodeGrid[i][j].isShip()){
@@ -115,7 +115,7 @@ public class CoastGuard extends SearchProblem{
     public TreeNode[] expand(TreeNode n) {
         CoastGuardTreeNode node=(CoastGuardTreeNode) n;
         //get current state values
-        Cell[][] grid = deserializeGrid(node.getState().grid);
+        Cell[][] grid = node.getState().grid;
         int capacity=node.getState().capacity;
         final int[] cgLocation=node.getState().cgLocation;
 
@@ -146,8 +146,7 @@ public class CoastGuard extends SearchProblem{
         Cell[][] newStateGrid=getNextMovementGridState(grid);
         Ship cell=( (Ship) newStateGrid[cgLocation[0]][cgLocation[1]]);
         cell.boxRetrieved = true;
-        //TODO: fix this to make location in state int[] mara wa7da
-        return new CoastGuardTreeNode(new CoastGuardState(serializeGrid(newStateGrid),capacity,cgLocation.clone()),node,Operators.RETRIEVE, node.depth+1);
+        return new CoastGuardTreeNode(new CoastGuardState(newStateGrid,capacity,cgLocation.clone()),node,Operators.RETRIEVE, node.depth+1);
     }
 
     private boolean canRetrieve(Cell[][] grid, int[] cgLocation) {
@@ -160,7 +159,7 @@ public class CoastGuard extends SearchProblem{
     private CoastGuardTreeNode expandDrop(Cell[][] grid, int capacity, int[] cgLocation, CoastGuardTreeNode node) {
         Cell[][] newStateGrid=getNextMovementGridState(grid);
         capacity=maxCapacity;
-        return new CoastGuardTreeNode(new CoastGuardState(serializeGrid(newStateGrid),capacity,cgLocation.clone()),node,Operators.DROP, node.depth+1);
+        return new CoastGuardTreeNode(new CoastGuardState(newStateGrid,capacity,cgLocation.clone()),node,Operators.DROP, node.depth+1);
     }
     //TODO add check not to drop if no passengers
     private boolean canDrop(Cell[][] grid, int[] cgLocation) {
@@ -177,7 +176,7 @@ public class CoastGuard extends SearchProblem{
         newStateGrid[cgLocation[0]][cgLocation[1]]= cell;
         cell.killPassenger();
         //System.out.println(newStateGrid[cgLocation[0]][cgLocation[1]].toString());
-        return new CoastGuardTreeNode(new CoastGuardState(serializeGrid(newStateGrid),capacity,cgLocation.clone()),node,Operators.PICKUP, node.depth+1);
+        return new CoastGuardTreeNode(new CoastGuardState(newStateGrid,capacity,cgLocation.clone()),node,Operators.PICKUP, node.depth+1);
     }
 
     private boolean canPickUp(Cell[][] grid, int capacity, int[] cgLocation) {
@@ -206,22 +205,22 @@ public class CoastGuard extends SearchProblem{
 
     private CoastGuardTreeNode expandMovementUp(Cell[][] newStateGrid,int capacity, int[] cgLocation,CoastGuardTreeNode parent) {
         int[] upLocation= new int[]{cgLocation[0]-1,cgLocation[1]};
-        return new CoastGuardTreeNode(new CoastGuardState(serializeGrid(newStateGrid),capacity,upLocation),parent,Operators.UP,parent.depth+1);
+        return new CoastGuardTreeNode(new CoastGuardState(newStateGrid,capacity,upLocation),parent,Operators.UP,parent.depth+1);
     }
 
     private CoastGuardTreeNode expandMovementDown(Cell[][] newStateGrid,int capacity, int[] cgLocation,CoastGuardTreeNode parent) {
         int[] downLocation= new int[]{cgLocation[0]+1,cgLocation[1]};
-        return new CoastGuardTreeNode(new CoastGuardState(serializeGrid(newStateGrid),capacity,downLocation),parent,Operators.DOWN,parent.depth+1);
+        return new CoastGuardTreeNode(new CoastGuardState(newStateGrid,capacity,downLocation),parent,Operators.DOWN,parent.depth+1);
     }
 
     private CoastGuardTreeNode expandMovementLeft(Cell[][] newStateGrid,int capacity, int[] cgLocation,CoastGuardTreeNode parent) {
         int[] leftLocation= new int[]{cgLocation[0],cgLocation[1]-1};
-        return new CoastGuardTreeNode(new CoastGuardState(serializeGrid(newStateGrid),capacity,leftLocation),parent,Operators.LEFT,parent.depth+1);
+        return new CoastGuardTreeNode(new CoastGuardState(newStateGrid,capacity,leftLocation),parent,Operators.LEFT,parent.depth+1);
     }
 
     private CoastGuardTreeNode expandMovementRight(Cell[][] newStateGrid,int capacity, int[] cgLocation,CoastGuardTreeNode parent) {
         int[] rightLocation= new int[]{cgLocation[0],cgLocation[1]+1};
-        return new CoastGuardTreeNode(new CoastGuardState(serializeGrid(newStateGrid),capacity,rightLocation),parent,Operators.RIGHT,parent.depth+1);
+        return new CoastGuardTreeNode(new CoastGuardState(newStateGrid,capacity,rightLocation),parent,Operators.RIGHT,parent.depth+1);
 
     }
 
@@ -263,7 +262,7 @@ public class CoastGuard extends SearchProblem{
       putStationsInGrid(splitted[3],parsedGrid);
       putShipsInGridInitial(splitted[4],parsedGrid);
       removeNullsFromGrid(parsedGrid);
-      getInitialState().grid=serializeGrid(parsedGrid);
+      getInitialState().grid=parsedGrid;
       //System.out.println("serializeGrid = " + getInitialState().grid);
     }
 
@@ -492,7 +491,7 @@ public class CoastGuard extends SearchProblem{
           //System.out.println(cgt);
           CoastGuardTreeNode[] nodePath = getAllParentNodes(cgt);
           Operators[] operators = getAllParentsOperations(nodePath);
-          String nodeState = cgt.getState().grid;
+          Cell[][] nodeState = cgt.getState().grid;
           int boxesRetrieved = getRetrievedBoxes(nodeState);
           int deathsCases = cgt.pathCost[0];
           long expandedNodes=qf.expandedNodes;
@@ -513,9 +512,9 @@ public class CoastGuard extends SearchProblem{
                 return output;
     }
 
-    private static int getRetrievedBoxes(String nodeState) {
+    private static int getRetrievedBoxes(Cell[][] nodeState) {
         int boxes = 0;
-        Cell[][] nodeGrid = deserializeGrid(nodeState);
+        Cell[][] nodeGrid = nodeState;
         for(int i=0 ; i<nodeGrid.length ; i++){
             for(int j=0 ; j<nodeGrid[0].length ; j++){
                 if(nodeGrid[i][j].isShip()){
