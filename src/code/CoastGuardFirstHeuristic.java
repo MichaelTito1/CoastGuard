@@ -5,7 +5,7 @@ public class CoastGuardFirstHeuristic implements Heuristic{
     public int[] heuristicCost(TreeNode n) {
         CoastGuardTreeNode node=(CoastGuardTreeNode) n;
         Cell[][] grid=CoastGuard.deserializeGrid(node.getState().grid);
-        int[] cgLocation=CoastGuard.getIntTuplesFromString(node.getState().cgLocation);
+        int[] cgLocation=node.getState().cgLocation;
         Ship closestShip=null;
         int closestDistance=Integer.MAX_VALUE;
         for (int i = 0; i < grid.length; i++) {

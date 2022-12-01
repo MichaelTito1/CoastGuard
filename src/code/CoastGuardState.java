@@ -5,9 +5,9 @@ import java.util.Objects;
 public class CoastGuardState {
     String grid;
     int capacity;
-    String cgLocation;
+    int[] cgLocation;
 
-    public CoastGuardState(String grid, int capacity, String cgLocation) {
+    public CoastGuardState(String grid, int capacity, int[] cgLocation) {
         this.grid = grid;
         this.capacity = capacity;
         this.cgLocation = cgLocation;
