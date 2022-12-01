@@ -629,6 +629,10 @@ public class CoastGuard extends SearchProblem{
                 return new Greedy(new CoastGuardFirstHeuristic());
             case "AS1":
                 return new AS(new CoastGuardFirstHeuristic());
+            case "GR2":
+                return new Greedy(new CoastGuardSecondHeuristic());
+            case "AS2":
+                return new AS(new CoastGuardSecondHeuristic());
             default:
                 throw new NullPointerException();
         }
@@ -708,9 +712,9 @@ public class CoastGuard extends SearchProblem{
         //test 7
         // System.out.println(CoastGuard.solve("6,7;82;1,4;2,3;1,1,58,3,0,58,4,2,72;", "BF", true));
         //test 4
-        //System.out.println(CoastGuard.solve("5,7;63;4,2;6,2,6,3;0,0,17,0,2,73,3,0,30;", "UC", true));
+        System.out.println(CoastGuard.solve("5,7;63;4,2;6,2,6,3;0,0,17,0,2,73,3,0,30;", "AS1", true));
         //test 0
-        System.out.println(CoastGuard.solve("5,6;50;0,1;0,4,3,3;1,1,90;", "AS1", true));
+        // System.out.println(CoastGuard.solve("5,6;50;0,1;0,4,3,3;1,1,90;", "AS2", true));
         //System.out.println(CoastGuard.solve("3,4;97;1,2;0,1;3,2,65;", "DF", false));
 
         // System.out.println(CoastGuard.solve(genGrid(), "BF", false));
