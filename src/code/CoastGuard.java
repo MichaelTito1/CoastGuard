@@ -1,5 +1,7 @@
 package code;
 
+import java.lang.management.ManagementFactory;
+import com.sun.management.OperatingSystemMXBean;
 import java.util.*;
 
 public class CoastGuard extends SearchProblem{
@@ -457,22 +459,6 @@ public class CoastGuard extends SearchProblem{
         return gridString;
     }
 
-    // private void printState(CoastGuardState state) {
-    //     String parsedGrid= state.grid;
-    //     Cell[][] arr = deserializeGrid(parsedGrid);
-    //     for (int i = 0; i < arr.length; i++) {
-    //         for (int j = 0; j < arr[0].length; j++) {
-    //             System.out.print(arr[i][j].toString() + ' ');
-    //         }
-    //         System.out.println();
-    //     }
-        
-    //     int[] location= state.cgLocation;
-    //     int capacity= state.capacity;
-
-    //     System.out.println(parsedGrid);
-    //     System.out.println("Coast guard : " + location[0]+","+location[1] + " and " + capacity);
-    // }
 
     private static void removeNullsFromGrid(Cell[][] grid){
         for(int i=0 ; i<grid.length ; i++){
@@ -633,28 +619,30 @@ public class CoastGuard extends SearchProblem{
         }
     }
 
+    static long getUsedRam(){
+        return Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory();
+    }
 
     // Driver code
     public static void main(String[] args) {
-        //String s = genGrid();
-        //System.out.println(s);
-        // BFS bfs = new BFS();
-        //CoastGuard cg = new CoastGuard(s);
-        // cg.printState(cg.getInitialState());
-        // CoastGuardTreeNode node = (CoastGuardTreeNode) CoastGuard.genericSearchProcedure(cg,bfs);
-        //System.out.println(CoastGuard.solve("3,4;97;1,2;0,1;3,2,10;", "BF", true));
-        //test 7
-        System.out.println(CoastGuard.solve("6,7;82;1,4;2,3;1,1,58,3,0,58,4,2,72;", "AS1", true));
-        //test 4
-        //System.out.println(CoastGuard.solve("5,7;63;4,2;6,2,6,3;0,0,17,0,2,73,3,0,30;", "AS1", true));
-        //test 0
-        // System.out.println(CoastGuard.solve("5,6;50;0,1;0,4,3,3;1,1,90;", "AS2", true));
-        //System.out.println(CoastGuard.solve("3,4;97;1,2;0,1;3,2,65;", "DF", false));
+        long before = getUsedRam();
 
-        // System.out.println(CoastGuard.solve(genGrid(), "BF", false));
+        OperatingSystemMXBean osBean = ManagementFactory.getPlatformMXBean(OperatingSystemMXBean.class);
+        float processLoadBefore = (float) osBean.getProcessCpuLoad();
+        float processTimeBefore = osBean.getProcessCpuTime()/(float)1e9;
 
-        // testing visualize
-        // String g = "3,4;0,1;3,2,65,20";
-        //CoastGuard.visualize(cg.getInitialState().grid);
+        System.out.println(CoastGuard.solve("6,7;82;1,4;2,3;1,1,58,3,0,58,4,2,72;", "ID", false));
+        
+        float processLoadAfter = (float) osBean.getProcessCpuLoad();
+        float processTimeAfter = osBean.getProcessCpuTime()/(float)1e9;
+        float processLoadDiff = (processLoadAfter-processLoadBefore)*100;
+        float processTimeDiff = processTimeAfter - processTimeBefore;
+
+        long after = getUsedRam();
+        long total = (long) 1e9;
+        float ramUsage = (after - before)/(float)1e6;
+        float ramUsagePercent = (after - before)/(float)total;
+        System.out.println("RAM usage = %" + ramUsagePercent*100 + " = " + ramUsage + " MBs");
+        System.out.println("CPU Avg Load = %" + processLoadDiff + " , CPU Time = " + processTimeDiff + " seconds");
     }
 }
