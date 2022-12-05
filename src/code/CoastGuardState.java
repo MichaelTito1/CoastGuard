@@ -1,13 +1,14 @@
 package code;
 
+import java.util.Arrays;
 import java.util.Objects;
 
 public class CoastGuardState {
-    String grid;
+    Cell[][] grid;
     int capacity;
-    String cgLocation;
+    int[] cgLocation;
 
-    public CoastGuardState(String grid, int capacity, String cgLocation) {
+    public CoastGuardState(Cell[][] grid, int capacity, int[] cgLocation) {
         this.grid = grid;
         this.capacity = capacity;
         this.cgLocation = cgLocation;
@@ -22,11 +23,14 @@ public class CoastGuardState {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         CoastGuardState that = (CoastGuardState) o;
-        return capacity == that.capacity && grid.equals(that.grid) && cgLocation.equals(that.cgLocation);
+        return capacity == that.capacity && Arrays.deepEquals(grid, that.grid) && Arrays.equals(cgLocation, that.cgLocation);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(grid, capacity, cgLocation);
+        int result = Objects.hash(capacity);
+        result = 31 * result + Arrays.deepHashCode(grid);
+        result = 31 * result + Arrays.hashCode(cgLocation);
+        return result;
     }
 }
