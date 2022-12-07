@@ -43,21 +43,17 @@ public class CoastGuard extends SearchProblem{
     @Override
     public boolean goalTest(TreeNode n) {
         CoastGuardTreeNode node=(CoastGuardTreeNode) n;
-        // state = {grid, capacity, location}
-        // if coast guard still has passengers on board, return false
-        //System.out.println("capacity = " + node.getState().capacity);
-        //System.out.println("maxCapacity = " + maxCapacity);
         if(node.getState().capacity != maxCapacity)
             return false;
         
-        //printState(node.getState());
+            
         Cell[][] curGrid = node.getState().grid;
         for (int i = 0; i < curGrid.length; i++) {
             for (int j = 0; j < curGrid[0].length; j++) {
                 Cell cell = curGrid[i][j];
                 if(cell.isShip()){ // check for passengers and box on ship
                     Ship ship = (Ship) cell; 
-                    //System.out.println(ship.passengersAlive);
+                    
                     if(ship.passengersAlive > 0 || (ship.boxHealth > 0 && !ship.boxRetrieved) )
                         return false;
                 }
@@ -65,32 +61,6 @@ public class CoastGuard extends SearchProblem{
         }
         return true;
     }
-
-//    /**
-//     * This method converts the string representation of a grid cell
-//     *
-//     * @param cell
-//     * @return
-//     */
-    // private Object[] deserializeCell(Cell cell){
-    //     String[] cellInfo = cell.split(",");
-    //     Object[] cellArr = new Object[cellInfo.length];
-    //     String cellType = cellInfo[0];
-    //     cellArr[0] = cellType;
-    //     if(cellType.equals("S")){
-    //         cellArr[1] = Integer.parseInt(cellInfo[1]); // num of passengers on board
-    //         cellArr[2] = Integer.parseInt(cellInfo[2]); // box health on board
-    //     }
-    //     return cellArr;
-    // }
-
-    // private String serializeCell(Object[] cell){
-    //     String[] strCell=new String[cell.length];
-    //     for (int i = 0; i < cell.length; i++) {
-    //         strCell[i]=cell[i].toString();
-    //     }
-    //     return String.join(",",strCell);
-    // }
 
     @Override
     public int[] pathCost(TreeNode n) {
@@ -143,7 +113,7 @@ public class CoastGuard extends SearchProblem{
         return expandedNodes.toArray(new TreeNode[0]);
     }
 
-    // TODO: Revise box retrieval mechanism. Check in pathcost that boxRetrieved and boxHealth
+    
     private CoastGuardTreeNode expandRetrieve(Cell[][] grid, int capacity, int[] cgLocation, CoastGuardTreeNode node) {
         Cell[][] newStateGrid=getNextMovementGridState(grid);
         Ship cell=( (Ship) newStateGrid[cgLocation[0]][cgLocation[1]]);
@@ -163,7 +133,7 @@ public class CoastGuard extends SearchProblem{
         capacity=maxCapacity;
         return new CoastGuardTreeNode(new CoastGuardState(newStateGrid,capacity,cgLocation.clone()),node,Operators.DROP, node.depth+1);
     }
-    //TODO add check not to drop if no passengers
+    
     private boolean canDrop(Cell[][] grid, int[] cgLocation,int capacity) {
         Cell cell=  grid[cgLocation[0]][cgLocation[1]];
         return cell.isStation()&&capacity<maxCapacity;
@@ -325,11 +295,7 @@ public class CoastGuard extends SearchProblem{
         Random rand = new Random();
 
         int m = rand.nextInt(11)+5;
-        // int m = rand.nextInt(5)+1;
         int n = rand.nextInt(11)+5;
-        // int n = rand.nextInt(5)+1;
-        // Cell string format: "type{;numOfPassengers;BoxHealth}", where:
-        // {;numOfPassengers;BoxHealth} is added if type is ship
         String [][] grid = new String[n][m];
 
         // generating coast guard's data
@@ -420,45 +386,6 @@ public class CoastGuard extends SearchProblem{
         return stateParsedGrid;
     }
 
-    /**
-     * This method converts the 2D grid to a serialized format in a string. 
-     * All cell information (including box health) are serialized. 
-     * @param grid 2D string array containing information for each cell
-     * @return string serialization of grid in the following format: "m,n;[stationX,stationY]*;[shipX,shipY,numPassengers,box]*"
-     */
-    private static String serializeGrid(Cell[][] grid){
-        int n=grid.length;
-        int m=grid[0].length;
-        // 2. get ships and stations info from the 2D grid
-        String stationString = "";
-        String shipString = "";
-        String gridString = m+","+n+';';
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < m; j++) {
-                if (!grid[i][j].isEmpty()) {
-                    // String[] cell = grid[i][j].split(",");
-                    Cell cell = grid[i][j];
-                    if (cell.isStation()) 
-                        stationString += i + "," + j + ",";
-                    else if (cell.isShip()) {
-                        shipString += i + "," + j + ","
-                                    + ((Ship)cell).passengersAlive + ","
-                                    +((Ship)cell).deadPassengers + ","
-                                    + ((Ship)cell).boxHealth + ","
-                                    + (((Ship)cell).boxRetrieved?"t":"f") + ",";
-                    }
-                }
-            }
-        }
-        // 3. adjust format of strings
-        stationString = stationString.substring(0, stationString.length() - 1) + ";";
-        shipString = shipString.substring(0, shipString.length() - 1);
-
-        // 4. add info to grid string and return
-        gridString += stationString + shipString;
-        return gridString;
-    }
-
 
     private static void removeNullsFromGrid(Cell[][] grid){
         for(int i=0 ; i<grid.length ; i++){
@@ -473,8 +400,7 @@ public class CoastGuard extends SearchProblem{
           CoastGuard cg = new CoastGuard(grid);
           QingFun qf = parseStrategy(strategy);
           CoastGuardTreeNode cgt = (CoastGuardTreeNode) genericSearchProcedure(cg, qf);
-          //TODO cover condition where no solution is found and cgt is null
-          //System.out.println(cgt);
+
           CoastGuardTreeNode[] nodePath = getAllParentNodes(cgt);
           Operators[] operators = getAllParentsOperations(nodePath);
           Cell[][] nodeState = cgt.getState().grid;
@@ -590,7 +516,7 @@ public class CoastGuard extends SearchProblem{
     /**
      * This method visualizes the given grid in the console.
      * @param gridStr a string representing the array. It has the following format: "m,n;[stationX,stationY]*;[shipX,shipY,numPassengers,box]*"
-     * @param cgLocation
+     * @param cgLocation coast guard location
      */
     public static void visualize(String gridStr, int[] cgLocation){
         Cell[][] grid = deserializeGrid(gridStr);
@@ -628,21 +554,17 @@ public class CoastGuard extends SearchProblem{
         long before = getUsedRam();
 
         OperatingSystemMXBean osBean = ManagementFactory.getPlatformMXBean(OperatingSystemMXBean.class);
-        float processLoadBefore = (float) osBean.getProcessCpuLoad();
         float processTimeBefore = osBean.getProcessCpuTime()/(float)1e9;
 
-        System.out.println(CoastGuard.solve("6,7;82;1,4;2,3;1,1,58,3,0,58,4,2,72;", "ID", false));
+        String grid9 = "7,5;100;3,4;2,6,3,5;0,0,4,0,1,8,1,4,77,1,5,1,3,2,94,4,3,46;";
+        System.out.println(CoastGuard.solve(grid9, "BF", false));
         
-        float processLoadAfter = (float) osBean.getProcessCpuLoad();
         float processTimeAfter = osBean.getProcessCpuTime()/(float)1e9;
-        float processLoadDiff = (processLoadAfter-processLoadBefore)*100;
         float processTimeDiff = processTimeAfter - processTimeBefore;
 
         long after = getUsedRam();
-        long total = (long) 1e9;
         float ramUsage = (after - before)/(float)1e6;
-        float ramUsagePercent = (after - before)/(float)total;
-        System.out.println("RAM usage = %" + ramUsagePercent*100 + " = " + ramUsage + " MBs");
-        System.out.println("CPU Avg Load = %" + processLoadDiff + " , CPU Time = " + processTimeDiff + " seconds");
+        System.out.println("RAM usage = " + ramUsage + " MBs");
+        System.out.println("CPU Time = " + processTimeDiff + " seconds");
     }
 }
