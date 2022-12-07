@@ -6,13 +6,15 @@ import java.util.Stack;
 public class ID extends QingFun{
     TreeNode root;
     int curDepth;
-    boolean overflow;
+    boolean overflow; // true if there is an expandable node that exceeds the curDepth; false otherwise.
+    
     public ID(){
         overflow=false;
         curDepth=0;
         queue=new Stack<TreeNode>();
         statesEnqueued=new HashSet<>();
     }
+    
     @Override
     void makeQ(TreeNode root) {
         this.root=root;
