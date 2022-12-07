@@ -2,7 +2,7 @@ package code;
 
 public abstract class SearchProblem {
     Object[] operators;
-    Object initialState;//TODO class state a7san?
+    Object initialState;
     Object[] stateSpace;
 
 
